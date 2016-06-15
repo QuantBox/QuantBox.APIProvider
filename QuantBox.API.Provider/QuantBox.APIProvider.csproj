@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E86E1057-B344-4805-A836-43606154677E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QuantBox.APIProvider</RootNamespace>
+    <AssemblyName>QuantBox.APIProvider</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.3.5\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="SmartQuant, Version=1.2.0.0, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\SmartQuant.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="XAPI_CSharp, Version=1.4.0.0, Culture=neutral, PublicKeyToken=895da28f5c4589cf, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\XAPI_CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ControlExtention.cs" />
+    <Compile Include="Data\TickWriter.cs" />
+    <Compile Include="Single\ExternalOrderRecord.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="Host\ProviderHost.cs" />
+    <Compile Include="Host\ProviderItem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Single\ApiItem.cs" />
+    <Compile Include="Single\BaseMap.cs" />
+    <Compile Include="Single\HistoricalDataRecord.cs" />
+    <Compile Include="Single\InstrumentJson.cs" />
+    <Compile Include="Single\MarketDataRecord.cs" />
+    <Compile Include="Single\QuoteMap.cs" />
+    <Compile Include="Single\OrderMap.cs" />
+    <Compile Include="Single\OrderRecord.cs" />
+    <Compile Include="Single\QuoteRecord.cs" />
+    <Compile Include="Single\ServerItem.cs" />
+    <Compile Include="Single\SessionTimeItem.cs" />
+    <Compile Include="Single\SingleProvider.API.HistoricalData.cs" />
+    <Compile Include="Single\SingleProvider.API.Quote.cs" />
+    <Compile Include="Single\SingleProvider.API.Order.cs" />
+    <Compile Include="Single\SingleProvider.API.cs" />
+    <Compile Include="Single\SingleProvider.API.MarketData.cs" />
+    <Compile Include="Single\SingleProvider.API.Connection.cs" />
+    <Compile Include="Single\SingleProvider.ExecutionProvider.cs" />
+    <Compile Include="Single\SingleProvider.HistoricalDataProvider.cs" />
+    <Compile Include="Single\SingleProvider.InstrumentProvider.cs" />
+    <Compile Include="Single\SingleProvider.Other.cs" />
+    <Compile Include="Single\SingleProvider.DataProvider.cs" />
+    <Compile Include="Single\SingleProvider.Settings.cs" />
+    <Compile Include="Single\SingleProvider.Provider.cs" />
+    <Compile Include="Single\UserItem.cs" />
+    <Compile Include="UI\ApiControlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\ApiControlForm.Designer.cs">
+      <DependentUpon>ApiControlForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ApiManagerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\ApiManagerForm.Designer.cs">
+      <DependentUpon>ApiManagerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ApiControlTypeEditor.cs" />
+    <Compile Include="UI\ApiManagerTypeEditor.cs" />
+    <Compile Include="UI\ApiTypeSelectorEditor.cs" />
+    <Compile Include="UI\JTypeDescriptor.cs" />
+    <Compile Include="UI\ServerItemConverter.cs" />
+    <Compile Include="UI\UserItemConverter.cs" />
+    <Compile Include="UI\ComboBoxItemTypeConvert.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\DataSources\QuantBox.APIProvider.Single.ApiItem.datasource" />
+    <None Include="Properties\DataSources\QuantBox.APIProvider.Single.ServerItem.datasource" />
+    <None Include="Properties\DataSources\QuantBox.APIProvider.Single.UserItem.datasource" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\ApiControlForm.resx">
+      <DependentUpon>ApiControlForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\ApiManagerForm.resx">
+      <DependentUpon>ApiManagerForm.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QuantBox.Extensions\QuantBox.Extensions.csproj">
+      <Project>{d8d82e27-47f5-4579-92ad-416da86ad601}</Project>
+      <Name>QuantBox.Extensions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
