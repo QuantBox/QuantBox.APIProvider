@@ -17,7 +17,7 @@ namespace QuantBox.APIProvider.Single
     public partial class SingleProvider
     {
         static SingleProvider() {
-            NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(Path.Combine(Helper.RootPath.LocalPath, "NLog.config"), true);
+            NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(Path.Combine(PathHelper.RootPath.LocalPath, "NLog.config"), true);
         }
         //记录合约列表,从实盘合约名到对象的映射
         private readonly Dictionary<string, InstrumentField> _dictInstruments = new Dictionary<string, InstrumentField>();
@@ -142,11 +142,6 @@ namespace QuantBox.APIProvider.Single
 
             ad.Fields.Add(AccountDataFieldEx.USER_DATA, item);
             ad.Fields.Add(AccountDataFieldEx.DATE, GetDate(DateTime.Today));
-
-            ////ad.Fields.Add(AccountDataFieldEx.LONG_QTY_TD, item.Long.TdPosition);
-            ////ad.Fields.Add(AccountDataFieldEx.LONG_QTY_YD, item.Long.YdPosition);
-            ////ad.Fields.Add(AccountDataFieldEx.SHORT_QTY_TD, item.Short.TdPosition);
-            ////ad.Fields.Add(AccountDataFieldEx.SHORT_QTY_YD, item.Short.YdPosition);
 
             try
             {

@@ -10,6 +10,8 @@ namespace QuantBox.Extensions
 {
     public static class OrderExtensions_OpenCloseType
     {
+        public static int index = OrderTagType.Network;
+
         public static Order Open(this Order order)
         {
             order.SetOpenClose(OpenCloseType.Open);
@@ -30,13 +32,13 @@ namespace QuantBox.Extensions
 
         public static Order SetOpenClose(this Order order, OpenCloseType OpenClose)
         {
-            order.GetDictionary()[OrderTagType.PositionEffect] = OpenClose;
+            order.GetDictionary(index)[OrderTagType.PositionEffect] = (byte)OpenClose;
             return order;
         }
 
         public static OpenCloseType? GetOpenClose(this Order order)
         {
-            object obj = order.GetDictionaryValue(OrderTagType.PositionEffect);
+            object obj = (OpenCloseType)order.GetDictionaryValue(OrderTagType.PositionEffect, index);
             return obj as OpenCloseType?;
         }
     } 

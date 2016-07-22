@@ -35,11 +35,11 @@ namespace QuantBox.APIProvider.Single
             get {
                 if (ProviderHost.autoMakeRelativePath)
                 {
-                    return Helper.MakeRelativePath(_dllPath);
+                    return PathHelper.MakeRelativePath(_dllPath);
                 }
                 else
                 {
-                    return Helper.MakeAbsolutePath(_dllPath);
+                    return PathHelper.MakeAbsolutePath(_dllPath);
                 }
             }
             set
@@ -47,11 +47,11 @@ namespace QuantBox.APIProvider.Single
                 string tmp_dllPath;
                 if (ProviderHost.autoMakeRelativePath)
                 {
-                    tmp_dllPath = Helper.MakeRelativePath(value);
+                    tmp_dllPath = PathHelper.MakeRelativePath(value);
                 }
                 else
                 {
-                    tmp_dllPath = Helper.MakeAbsolutePath(value);
+                    tmp_dllPath = PathHelper.MakeAbsolutePath(value);
                 }
 
                 // 不一样

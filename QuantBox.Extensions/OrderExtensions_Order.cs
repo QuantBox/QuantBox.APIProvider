@@ -9,20 +9,22 @@ namespace QuantBox.Extensions
 {
     /// <summary>
     /// 有SameTimeOrder和NextTimeOrder两种区别
-    /// 1.SameTimeOrde表示同一时刻发出来的订单
-    /// 2.NextTimeOrder表示接下来要发的订单
+    /// 1.SameTimeOrde表示同一时刻发出来的订单,特殊的用于记录关联的Order，但没有先后循序，如Quote报单
+    /// 2.NextTimeOrder表示接下来要发的订单，用于记录下一笔Order,如平仓后开仓 
     /// </summary>
     public static class OrderExtensions_Order
     {
+        public static int index = OrderTagType.Local;
+
         public static Order SetSameTimeOrder(this Order order, Order ord)
         {
-            order.GetDictionary()[OrderTagType.SameTimeOrder] = ord;
+            order.GetDictionary(index)[OrderTagType.SameTimeOrder] = ord;
             return order;
         }
 
         public static Order GetSameTimeOrder(this Order order)
         {
-            object obj = order.GetDictionaryValue(OrderTagType.SameTimeOrder);
+            object obj = order.GetDictionaryValue(OrderTagType.SameTimeOrder, index);
             return obj as Order;
         }
 
@@ -43,13 +45,13 @@ namespace QuantBox.Extensions
 
         public static Order SetNextTimeOrder(this Order order, Order ord)
         {
-            order.GetDictionary()[OrderTagType.NextTimeOrder] = ord;
+            order.GetDictionary(index)[OrderTagType.NextTimeOrder] = ord;
             return order;
         }
 
         public static Order GetNextTimeOrder(this Order order)
         {
-            object obj = order.GetDictionaryValue(OrderTagType.NextTimeOrder);
+            object obj = order.GetDictionaryValue(OrderTagType.NextTimeOrder, index);
             return obj as Order;
         }
 

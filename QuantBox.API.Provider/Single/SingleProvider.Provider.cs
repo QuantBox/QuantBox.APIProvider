@@ -87,11 +87,6 @@ namespace QuantBox.APIProvider.Single
                 ConfigPath = Path.Combine(Installation.ConfigDir.FullName, Name);
             }
             Directory.CreateDirectory(ConfigPath);
-            //if (string.IsNullOrEmpty(Pd0Path))
-            //{
-            //    Pd0Path = Path.Combine(Installation.DataDir.FullName, "PD0", Name);
-            //}
-            //Directory.CreateDirectory(Pd0Path);
 
             marketDataRecords = new Dictionary<string, MarketDataRecord>();
 
@@ -205,6 +200,7 @@ namespace QuantBox.APIProvider.Single
 
         public override void Connect()
         {
+            // 测试用
             //base.Status = ProviderStatus.Connected;
             //return;
 

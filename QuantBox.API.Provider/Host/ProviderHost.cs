@@ -88,38 +88,38 @@ namespace QuantBox.APIProvider
             base.description = "QuantBox API Provider Host";
             base.url = "www.quantbox.cn";
 
-            if (!_bMenuAdded)
-            {
-                try
-                {
-                    // DOS窗口时没有问题，非DOS下异常，所以可以利用一下
-                    Console.Clear();
-                }
-                catch
-                {
-                    Console.WriteLine("要创建自己的菜单");
-                    // 只有DOS窗口时要注意
-                    System.Threading.ThreadPool.QueueUserWorkItem(delegate
-                    {
-                        while (Application.OpenForms.Count == 0 || Application.OpenForms[0].Name != "MainForm")
-                        {
-                            System.Threading.Thread.Sleep(1000);
-                        }
-                        Form mainForm = Application.OpenForms[0];
+            //if (!_bMenuAdded)
+            //{
+            //    try
+            //    {
+            //        // DOS窗口时没有问题，非DOS下异常，所以可以利用一下
+            //        Console.Clear();
+            //    }
+            //    catch
+            //    {
+            //        Console.WriteLine("要创建自己的菜单");
+            //        // 只有DOS窗口时要注意
+            //        System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            //        {
+            //            while (Application.OpenForms.Count == 0 || Application.OpenForms[0].Name != "MainForm")
+            //            {
+            //                System.Threading.Thread.Sleep(1000);
+            //            }
+            //            Form mainForm = Application.OpenForms[0];
 
-                        try
-                        {
-                            mainForm.SafeInvoke(() => { AddToolStripMenuItem(mainForm); });
-                        }
-                        catch (Exception e)
-                        {
-                            // 奇怪，调试的时候总是会出错
-                            Console.WriteLine(e);
-                        }
-                    });
-                }
-                _bMenuAdded = true;
-            }
+            //            try
+            //            {
+            //                mainForm.SafeInvoke(() => { AddToolStripMenuItem(mainForm); });
+            //            }
+            //            catch (Exception e)
+            //            {
+            //                // 奇怪，调试的时候总是会出错
+            //                Console.WriteLine(e);
+            //            }
+            //        });
+            //    }
+            //    _bMenuAdded = true;
+            //}
         }
 
         /// <summary>
@@ -246,41 +246,6 @@ namespace QuantBox.APIProvider
         public override void Unsubscribe(InstrumentList instrument)
         {
             DataProvider.Unsubscribe(instrument);
-        }
-        #endregion
-
-        #region
-        public void AddMenuViewItem(Form mainForm)
-        {
-            MenuStrip mainMenuStrip = mainForm.MainMenuStrip;
-            ToolStripMenuItem menuView = mainMenuStrip.Items[2] as ToolStripMenuItem;
-            ToolStripSeparator menu_Sepearator = new ToolStripSeparator();
-            menuView.DropDownItems.Add(menu_Sepearator);
-            ToolStripMenuItem menuView_Script = new ToolStripMenuItem("Script Explorer");
-            menuView.DropDownItems.Add(menuView_Script);
-
-            menuView_Script.Click += menuView_Script_Click;
-        }
-
-        public void AddToolStripMenuItem(Form mainForm)
-        {
-            MenuStrip mainMenuStrip = mainForm.MainMenuStrip;
-            ToolStripItem menuHello = new ToolStripMenuItem("(^_^)");
-            mainMenuStrip.Items.Add(menuHello);
-
-            menuHello.Click += menuHello_Click;
-        }
-
-        void menuHello_Click(object sender, EventArgs e)
-        {
-            DialogResult dr = MessageBox.Show("您好！请支持正版。\n请来银河期货开户，支持我们的工作！\n可官网申请仿真账号或预约开户，预约号请填818。\n是否跳转到银河期货官网？", "QuantBox插件", MessageBoxButtons.YesNo);
-            if(dr == DialogResult.Yes)
-                System.Diagnostics.Process.Start("http://yhqh.com.cn/index.php?m=content&c=index&a=lists&catid=402&Dept=818"); 
-        }
-
-        private void menuView_Script_Click(object sender, EventArgs e)
-        {
-            //OpenQuant.Shared.Global.DockManager.Open(typeof(AccountDataWindow));
         }
         #endregion
     }

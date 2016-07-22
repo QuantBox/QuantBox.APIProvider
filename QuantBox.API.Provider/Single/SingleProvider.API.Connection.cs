@@ -252,7 +252,7 @@ namespace QuantBox.APIProvider.Single
 
                 if (api == null)
                 {
-                    api = new XApi(Helper.MakeAbsolutePath(item.DllPath));
+                    api = new XApi(PathHelper.MakeAbsolutePath(item.DllPath));
                     item.Api = api;
                 }
 

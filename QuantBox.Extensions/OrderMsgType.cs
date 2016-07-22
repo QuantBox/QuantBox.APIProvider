@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace QuantBox.Extensions
 {
+    /// <summary>
+    /// 这里最好与FIX对应
+    /// </summary>
     public class OrderMsgType
     {
         public const char NewOrderSingle = 'D';

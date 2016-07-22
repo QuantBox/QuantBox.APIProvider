@@ -11,24 +11,31 @@ namespace QuantBox.Extensions
     /// </summary>
     public class OrderTagType
     {
-        public const int Zero = 0;
+        // 数据类型0位置都放需要在网络中传的参数，争取让ObjectTable小于10
+        public const int Network = 0;
+        // 在本地就可以处理好的数据类型，没有必要在网络中传输，并且有可能无法序列化
+        public const int Local = 1;
+        // 留给用户自定义的数据类型，让用户自己发挥的类型，可做临时变量等等
+        public const int Custom = 2;
 
-        //public const int Account = 1;已经支持了，所以这不需要了
-        public const int MsgType = 35;
-        public const int Side = 54;
-        public const int PositionEffect = 77;
-        public const int QuoteReqID = 131;  // 这个名字可能有错，需要确认
 
-        public const int HedgeFlag = 5000; // 投机与保值，这个不知道对应的是哪一个，先这样用着
+        // ===== 需要跨网络传输的Tag
+        public const int MsgType = 0;
+        public const int Side = 1;
+        public const int PositionEffect = 2;
+        public const int HedgeFlag = 3; // 投机与保值，这个不知道对应的是哪一个，先这样用着
 
-        public const int CancelCount = 9996; // 定时撤单次数，用来区分是否跟单功能撤单
-        public const int SendCount = 9997;//记录跟单时重发次数
-        public const int NextTimeOrder = 9998; // 用于记录下一笔Order,如平仓后开仓 
-        public const int SameTimeOrder = 9999; // 特殊的用于记录关联的Order，但没有先后循序，如Quote报单
+        public const int PortfolioID1 = 4;
+        public const int PortfolioID2 = 5;
+        public const int PortfolioID3 = 6;
+        public const int Business = 7;
+        public const int QuoteReqID = 8;  // 这个名字可能有错，需要确认
 
-        public const int PortfolioID1 = 60001;
-        public const int PortfolioID2 = 60002;
-        public const int PortfolioID3 = 60003;
-        public const int Business = 60003;
+
+        // ===== 不需要网络传输的类型，并且有可能无法序列化
+        public const int NextTimeOrder = 0; // 用于记录下一笔Order,如平仓后开仓 
+        public const int SameTimeOrder = 1; // 特殊的用于记录关联的Order，但没有先后循序，如Quote报单
+        public const int CancelCount = 2; // 定时撤单次数，用来区分是否跟单功能撤单
+        public const int SendCount = 3;//记录跟单时重发次数
     }
 }
