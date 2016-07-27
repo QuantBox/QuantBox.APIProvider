@@ -79,7 +79,7 @@ namespace QuantBox.APIProvider
             Save(ConfigPath);
         }
 
-        private static bool _bMenuAdded;
+        //private static bool _bMenuAdded;
 
         public void Init(byte id, string name)
         {

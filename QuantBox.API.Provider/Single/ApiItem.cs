@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using NLog;
 using QuantBox.APIProvider.UI;
 using XAPI.Callback;
 using System;

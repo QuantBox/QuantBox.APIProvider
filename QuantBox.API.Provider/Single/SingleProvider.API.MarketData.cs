@@ -46,7 +46,7 @@ namespace QuantBox.APIProvider.Single
                 catch
                 {
                     _exchangeDateTime = _dateTime;
-                    (sender as XApi).Log.Error("{0} ExchangeDateTime有误，现使用LocalDateTime代替，请找API开发人员处理API中的时间兼容问题。", pDepthMarketData.ToFormattedStringExchangeDateTime());
+                    (sender as XApi).GetLog().Error("{0} ExchangeDateTime有误，现使用LocalDateTime代替，请找API开发人员处理API中的时间兼容问题。", pDepthMarketData.ToFormattedStringExchangeDateTime());
                 }
 
 
@@ -71,7 +71,7 @@ namespace QuantBox.APIProvider.Single
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
 

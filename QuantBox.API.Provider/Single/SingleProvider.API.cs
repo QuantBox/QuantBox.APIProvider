@@ -48,7 +48,7 @@ namespace QuantBox.APIProvider.Single
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQryInstrument");
+                (sender as XApi).GetLog().Info("OnRspQryInstrument");
                 return;
             }
 
@@ -56,7 +56,7 @@ namespace QuantBox.APIProvider.Single
             
             if(bIsLast)
             {
-                (sender as XApi).Log.Info("合约列表已经接收完成,共 {0} 条", _dictInstruments.Count);
+                (sender as XApi).GetLog().Info("合约列表已经接收完成,共 {0} 条", _dictInstruments.Count);
             }
         }
 
@@ -64,11 +64,11 @@ namespace QuantBox.APIProvider.Single
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQryTradingAccount");
+                (sender as XApi).GetLog().Info("OnRspQryTradingAccount");
                 return;
             }
 
-            (sender as XApi).Log.Info("OnRspQryTradingAccount:" + account.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnRspQryTradingAccount:" + account.ToFormattedString());
 
             if (!IsConnected)
                 return;
@@ -95,7 +95,7 @@ namespace QuantBox.APIProvider.Single
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
 
@@ -103,22 +103,22 @@ namespace QuantBox.APIProvider.Single
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQryInvestor");
+                (sender as XApi).GetLog().Info("OnRspQryInvestor");
                 return;
             }
 
-            (sender as XApi).Log.Info("OnRspQryInvestor:{0}", investor.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnRspQryInvestor:{0}", investor.ToFormattedString());
         }
 
         private void OnRspQryInvestorPosition_callback(object sender, ref PositionField position, int size1, bool bIsLast)
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQryInvestorPosition");
+                (sender as XApi).GetLog().Info("OnRspQryInvestorPosition");
                 return;
             }
 
-            (sender as XApi).Log.Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
 
             if (!IsConnected)
                 return;
@@ -149,7 +149,7 @@ namespace QuantBox.APIProvider.Single
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
 
@@ -157,13 +157,13 @@ namespace QuantBox.APIProvider.Single
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQrySettlementInfo");
+                (sender as XApi).GetLog().Info("OnRspQrySettlementInfo");
                 return;
             }
 
             if (bIsLast)
             {
-                (sender as XApi).Log.Info("OnRspQrySettlementInfo:" + Environment.NewLine + settlementInfo.Content);
+                (sender as XApi).GetLog().Info("OnRspQrySettlementInfo:" + Environment.NewLine + settlementInfo.Content);
             }
         }
 
@@ -172,33 +172,33 @@ namespace QuantBox.APIProvider.Single
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQryQuote");
+                (sender as XApi).GetLog().Info("OnRspQryQuote");
                 return;
             }
 
-            (sender as XApi).Log.Info("OnRspQryQuote:" + quote.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnRspQryQuote:" + quote.ToFormattedString());
         }
 
         private void OnRspQryTrade_callback(object sender, ref TradeField trade, int size1, bool bIsLast)
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQryTrade");
+                (sender as XApi).GetLog().Info("OnRspQryTrade");
                 return;
             }
 
-            (sender as XApi).Log.Info("OnRspQryTrade:" + trade.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnRspQryTrade:" + trade.ToFormattedString());
         }
 
         private void OnRspQryOrder_callback(object sender, ref OrderField order, int size1, bool bIsLast)
         {
             if (size1 <= 0)
             {
-                (sender as XApi).Log.Info("OnRspQryOrder");
+                (sender as XApi).GetLog().Info("OnRspQryOrder");
                 return;
             }
 
-            (sender as XApi).Log.Info("OnRspQryOrder:" + order.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnRspQryOrder:" + order.ToFormattedString());
         }
     }
 }

@@ -9,7 +9,6 @@ using QuantBox.Extensions;
 
 using XAPI.Callback;
 using XAPI;
-using NLog;
 using Newtonsoft.Json;
 
 using SQ = SmartQuant;
@@ -89,7 +88,7 @@ namespace QuantBox.APIProvider.Single
                 && 0 == LowerLimitPrice)
             {
                 //涨跌停无效
-                _TdApi.Log.Warn("Symbol:{0},Symbol_Dot_Exchange:{1},LowerLimitPrice && UpperLimitPrice 为0,没有进行价格修正",
+                _TdApi.GetLog().Warn("Symbol:{0},Symbol_Dot_Exchange:{1},LowerLimitPrice && UpperLimitPrice 为0,没有进行价格修正",
                     record.Symbol,record.Symbol_Dot_Exchange);
             }
             else
@@ -283,27 +282,27 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRtnOrder_callback(object sender, ref OrderField order)
         {
-            (sender as XApi).Log.Debug("OnRtnOrder:" + order.ToFormattedString());
+            (sender as XApi).GetLog().Debug("OnRtnOrder:" + order.ToFormattedString());
             try
             {
                 orderMap.Process(ref order);
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
 
         private void OnRtnTrade_callback(object sender, ref TradeField trade)
         {
-            (sender as XApi).Log.Debug("OnRtnTrade:" + trade.ToFormattedString());
+            (sender as XApi).GetLog().Debug("OnRtnTrade:" + trade.ToFormattedString());
             try
             {
                 orderMap.Process(ref trade);
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
     }

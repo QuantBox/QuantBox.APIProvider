@@ -40,9 +40,8 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="XAPI_CSharp, Version=1.4.0.0, Culture=neutral, PublicKeyToken=895da28f5c4589cf, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\XAPI_CSharp.dll</HintPath>
+    <Reference Include="XAPI_CSharp">
+      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\XAPI_CSharp.exe</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

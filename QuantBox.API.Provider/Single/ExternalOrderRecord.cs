@@ -2,7 +2,7 @@
 {
     class ExternalOrderRecord
     {
-        public int InstrumentId;
+        public int InstrumentId = 0;
         public OrderRecord BuyOpen;
         public OrderRecord BuyClose;
         public OrderRecord SellOpen;

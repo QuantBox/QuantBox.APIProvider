@@ -9,7 +9,6 @@ using System.Windows.Forms;
 using XAPI.Callback;
 using XAPI;
 using NLog;
-using QuantBox.APIProvider.Data;
 using QuantBox.Extensions;
 
 namespace QuantBox.APIProvider.Single
@@ -348,16 +347,16 @@ namespace QuantBox.APIProvider.Single
             {
                 if(userLogin.RawErrorID != 0 )
                 {
-                    (sender as XApi).Log.Info("{0}:{1}", status, userLogin.ToFormattedStringShort());
+                    (sender as XApi).GetLog().Info("{0}:{1}", status, userLogin.ToFormattedStringShort());
                 }
                 else
                 {
-                    (sender as XApi).Log.Info("{0}:{1}", status, userLogin.ToFormattedStringLong());
+                    (sender as XApi).GetLog().Info("{0}:{1}", status, userLogin.ToFormattedStringLong());
                 }
             }
             else
             {
-                (sender as XApi).Log.Info("{0}", status);
+                (sender as XApi).GetLog().Info("{0}", status);
             }
 
             switch (status)
@@ -434,17 +433,17 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRtnError_callback(object sender, ref ErrorField error)
         {
-            (sender as XApi).Log.Error("OnRtnError:" + error.ToFormattedString());
+            (sender as XApi).GetLog().Error("OnRtnError:" + error.ToFormattedString());
         }
 
         private void OnLog_callback(object sender, ref LogField log)
         {
-            (sender as XApi).Log.Info("OnLog:" + log.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnLog:" + log.ToFormattedString());
         }
 
         private void OnRtnQuoteRequest_callback(object sender, ref QuoteRequestField quoteRequest)
         {
-            (sender as XApi).Log.Info("OnRtnQuoteRequest:" + quoteRequest.ToFormattedString());
+            (sender as XApi).GetLog().Info("OnRtnQuoteRequest:" + quoteRequest.ToFormattedString());
 
             MarketDataRecord record;
             if (!marketDataRecords.TryGetValue(quoteRequest.Symbol, out record))
