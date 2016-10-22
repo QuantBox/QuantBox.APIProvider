@@ -452,7 +452,7 @@ namespace QuantBox.APIProvider.Single
             }
 
             NewsEx news = new NewsEx(DateTime.Now, this.id, record.Instrument.Id, NewsUrgency.Flash, "", "", quoteRequest.ToFormattedString());
-            news.ResponeType = ResponeType.OnRtnQuoteRequest;
+            news.ResponseType = XAPI.ResponseType.OnRtnQuoteRequest;
             news.UserData = quoteRequest;
             EmitData(news);
         }

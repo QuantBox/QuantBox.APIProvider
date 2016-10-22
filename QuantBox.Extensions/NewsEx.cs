@@ -19,7 +19,7 @@ namespace QuantBox.Extensions
         {
         }
 
-        public ResponeType ResponeType;
+        public XAPI.ResponseType ResponseType;
         public object UserData;
     }
 }
