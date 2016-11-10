@@ -85,7 +85,7 @@ namespace QuantBox.Extensions
 
         public static XAPI.OrderSide? GetSide(this Order order)
         {
-            object obj = (XAPI.OrderSide)order.GetDictionaryValue(OrderTagType.Side, index);
+            object obj = order.GetDictionaryValue(OrderTagType.Side, index);
             return obj as XAPI.OrderSide?;
         }
     } 

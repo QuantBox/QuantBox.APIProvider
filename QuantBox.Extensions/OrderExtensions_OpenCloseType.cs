@@ -38,7 +38,7 @@ namespace QuantBox.Extensions
 
         public static OpenCloseType? GetOpenClose(this Order order)
         {
-            object obj = (OpenCloseType)order.GetDictionaryValue(OrderTagType.PositionEffect, index);
+            object obj = order.GetDictionaryValue(OrderTagType.PositionEffect, index);
             return obj as OpenCloseType?;
         }
     } 
