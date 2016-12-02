@@ -74,12 +74,12 @@ namespace QuantBox.APIProvider.Single
                             // 取公共部分
                             UseType = UseType & Type;
                         }
-                        catch
+                        catch(Exception ex)
                         {
                             Api = null;
                             Type = ApiType.Nono;
-                            Name =  null;
-                            Version = null;
+                            Name =  ex.Message;
+                            Version = "请使用depends检查一下是否缺少依赖";
                             UseType = ApiType.Nono;
                         }
                     }

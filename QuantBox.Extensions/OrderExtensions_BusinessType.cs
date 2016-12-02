@@ -21,7 +21,11 @@ namespace QuantBox.Extensions
         public static BusinessType? GetBusinessType(this Order order)
         {
             object obj = order.GetDictionaryValue(OrderTagType.Business, index);
-            return obj as BusinessType?;
+            if (obj == null)
+            {
+                return (BusinessType?)obj;
+            }
+            return (BusinessType?)(byte)obj;
         }
     }
 }

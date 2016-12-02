@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -44,7 +44,8 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="XAPI_CSharp">
+    <Reference Include="XAPI_CSharp, Version=1.5.0.0, Culture=neutral, PublicKeyToken=895da28f5c4589cf, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\XAPI_CSharp.exe</HintPath>
     </Reference>
   </ItemGroup>

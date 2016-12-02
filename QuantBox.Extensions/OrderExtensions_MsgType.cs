@@ -20,7 +20,7 @@ namespace QuantBox.Extensions
         public static char? GetMsgType(this Order order)
         {
             object obj = order.GetDictionaryValue(OrderTagType.MsgType, index);
-            return obj as char?;
+            return (char?)obj;
         }
     } 
 }

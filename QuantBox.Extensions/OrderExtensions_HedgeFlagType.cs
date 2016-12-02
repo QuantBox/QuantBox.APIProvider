@@ -20,7 +20,11 @@ namespace QuantBox.Extensions
         public static HedgeFlagType? GetHedgeFlag(this Order order)
         {
             object obj = order.GetDictionaryValue(OrderTagType.HedgeFlag, index);
-            return obj as HedgeFlagType?;
+            if (obj == null)
+            {
+                return (HedgeFlagType?)obj;
+            }
+            return (HedgeFlagType?)(byte)obj;
         }
     }
 }
