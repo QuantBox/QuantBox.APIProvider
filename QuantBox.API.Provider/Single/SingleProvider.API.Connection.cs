@@ -337,7 +337,7 @@ namespace QuantBox.APIProvider.Single
 
         private XApi ConnectToApi(ApiItem item)
         {
-            lock (this)
+            //lock (this)
             {
                 DisconnectToApi(item);
 
@@ -403,15 +403,40 @@ namespace QuantBox.APIProvider.Single
 
         private void DisconnectToApi(ApiItem item)
         {
-            lock (this)
+            if(item.Api != null)
             {
-                if (item.Api != null)
+                // 直接销毁
+                _DisconnectToApi(item.Api);
+                
+                //// 在线程中销毁
+                //Task task = Task.Factory.StartNew(
+                //    ()=> { _DisconnectToApi(item.Api); }
+                //    );
+
+                item.Api = null;
+            }
+        }
+
+        private void _DisconnectToApi(XApi api)
+        {
+            try
+            {
+                if (api != null)
                 {
                     // 断开连接可能卡死
-                    item.Api.Disconnect();
-                    item.Api.Dispose();
-                    item.Api = null;
+                    api.ReconnectInterval = 0;
+                    api.Disconnect();
+                    api.Dispose();
+                    api = null;
                 }
+            }
+            catch (Exception ex)
+            {
+                xlog.Error(ex.Message);
+            }
+            finally
+            {
+                api = null;
             }
         }
 

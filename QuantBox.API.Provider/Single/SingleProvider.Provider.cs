@@ -195,7 +195,8 @@ namespace QuantBox.APIProvider.Single
 
             // 启动重连定时器
             _Timer.Elapsed -= _Timer_Elapsed;
-            _Timer.Interval = 15 * 1000;
+            // 改小用来测试连接销毁，用完要改回去
+            _Timer.Interval = 17 * 1000;
             _Timer.Enabled = true;
             _Timer.Elapsed += _Timer_Elapsed;
 
