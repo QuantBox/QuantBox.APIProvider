@@ -39,13 +39,6 @@ namespace QuantBox.APIProvider.Single
         ~SingleProvider()
         {
             Save();
-
-            // 将行情记录器清理
-            //if(_tickWriter != null)
-            //{
-            //    _tickWriter.Close();
-            //    _tickWriter = null;
-            //}
         }
 
         private static JsonSerializerSettings jSetting = new JsonSerializerSettings()
@@ -62,10 +55,6 @@ namespace QuantBox.APIProvider.Single
             base.name = name;
             base.description = "QuantBox API Provider";
             base.url = "www.quantbox.cn";
-
-            // 使用TPL DataFlow来进行行情的保存
-            //Input = new ActionBlock<DepthMarketDataField>((x) => OnInputMarketData(x));
-
 
             // 只是简单设置，等登录时将把账号设置上，X日志由于一些信息没法
             xlog = LogManager.GetLogger(Name + ".X");
@@ -104,6 +93,7 @@ namespace QuantBox.APIProvider.Single
 
         void SessionTimeList_ListChanged(object sender, ListChangedEventArgs e)
         {
+            //xlog.Info("交易会话时间更新");
             Save(ConfigPath, "SessionTimeList.json", SessionTimeList);
         }
 
@@ -200,14 +190,8 @@ namespace QuantBox.APIProvider.Single
 
         public override void Connect()
         {
-            // 测试用
-            //base.Status = ProviderStatus.Connected;
-            //return;
-
             _QueryAccountCount = _QueryAccountInterval;
             _QueryPositionCount = _QueryPositionInterval;
-            // 如果一开始没有连接，直接运行，会启动时调用一次，订阅时又调用一次，最后导致连接被断开
-            // 如查开始就使用while sleep进行处理就没有这个问题
 
             // 启动重连定时器
             _Timer.Elapsed -= _Timer_Elapsed;
@@ -223,14 +207,7 @@ namespace QuantBox.APIProvider.Single
             _Timer.Elapsed -= _Timer_Elapsed;
             _Timer.Enabled = false;
 
-            base.Status = ProviderStatus.Disconnecting;
-
             _Disconnect(true);
-        }
-
-        private bool IsApiConnected(XApi api)
-        {
-            return (api != null && api.IsConnected);
         }
 
         public override void Clear()

@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlExtention.cs" />
+    <Compile Include="PropertySorter.cs" />
     <Compile Include="Single\Extensions.cs" />
     <Compile Include="Single\ExternalOrderRecord.cs" />
     <Compile Include="PathHelper.cs" />
