@@ -196,10 +196,11 @@ namespace QuantBox.APIProvider.Single
             // 启动重连定时器
             _Timer.Elapsed -= _Timer_Elapsed;
             // 改小用来测试连接销毁，用完要改回去
-            _Timer.Interval = 17 * 1000;
+            _Timer.Interval = 20 * 1000;
             _Timer.Enabled = true;
             _Timer.Elapsed += _Timer_Elapsed;
 
+            xlog.Info("重连检测定时器开启，检测频率(毫秒):{0}", _Timer.Interval);
             _Connect(true);
         }
         public override void Disconnect()
@@ -207,6 +208,8 @@ namespace QuantBox.APIProvider.Single
             // 关闭重连定时器
             _Timer.Elapsed -= _Timer_Elapsed;
             _Timer.Enabled = false;
+
+            xlog.Info("重连检测定时器关闭");
 
             _Disconnect(true);
         }

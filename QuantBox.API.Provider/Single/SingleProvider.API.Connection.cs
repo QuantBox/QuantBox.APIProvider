@@ -94,12 +94,24 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
+        private volatile bool bTryDisconnect = false;
         private void _Disconnect(bool bFromUI)
         {
+            if (bTryDisconnect)
+            {
+                xlog.Info("已经有断开操作进行当中，正发起的断开操作被忽略");
+                xlog.Info("如果你是手工发起的断开操作，定时器已经停止工作。你可能需要再手工断开一次。");
+                return;
+            }
+
+            // 如果正好有销毁的，手工再销毁一次，会出问题
+            // 所以，如果发现是
             lock (this)
             {
                 if (IsDisconnected)
                     return;
+
+                bTryDisconnect = true;
 
                 if (bFromUI)
                 {
@@ -109,8 +121,6 @@ namespace QuantBox.APIProvider.Single
                 else
                 {
                     xlog.Info("插件尝试断开...");
-                    // 这个状态不能随便用，除非明确可以收到新的断开的事件，否则会导致连接不能手工重连
-                    //base.Status = ProviderStatus.Disconnecting;
                     base.Status = ProviderStatus.Connecting;
                 }
 
@@ -118,10 +128,13 @@ namespace QuantBox.APIProvider.Single
                 {
                     DisconnectToApi(item);
                 }
+
+                bTryDisconnect = false;
             }
         }
 
 
+        private int nDisconnectCount = 0;
         void _Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             lock(this)
@@ -137,6 +150,7 @@ namespace QuantBox.APIProvider.Single
                     bool bTryConnect = true;
 
                     SessionTimeItem st_current = null;
+                    SessionTimeItem st_next = null;
                     foreach (var st in SessionTimeList.ToList())
                     {
                         // 如果当前时间在交易范围内，要开启重连
@@ -146,6 +160,7 @@ namespace QuantBox.APIProvider.Single
                         {
                             // 停
                             bTryConnect = false;
+                            st_next = st;
                         }
                         else if (ts <= st.SessionEnd)
                         {
@@ -158,6 +173,7 @@ namespace QuantBox.APIProvider.Single
                         {
                             // 停
                             bTryConnect = false;
+                            st_next = st;
                         }
                     }
 
@@ -172,18 +188,22 @@ namespace QuantBox.APIProvider.Single
 
                         // 初始化查询间隔
                         SetApiReconnectInterval(_ReconnectInterval);
+
+                        nDisconnectCount = 0;
                     }
                     else
                     {
                         // 关闭查询间隔
                         SetApiReconnectInterval(0);
-
-                        if (IsConnected_OneInApiList())
+                        // 由于定时器设置的是20秒，所以这里正好是5分钟显示一次
+                        if (nDisconnectCount % (3*5) == 0)
                         {
-                            xlog.Info("当前[{0}]在非交易时段，主动断开连接", e.SignalTime.TimeOfDay);
+                            xlog.Info("当前[{0}]在非交易时段，主动断开连接，下次要连接的时段为[{1}]", e.SignalTime.TimeOfDay, st_next);
+
                             // 要断开连接
                             _Disconnect(false);
                         }
+                        ++nDisconnectCount;
                     }
                 } while (false);
 
@@ -196,7 +216,7 @@ namespace QuantBox.APIProvider.Single
 
         private void OnConnectionStatus_callback(object sender, ConnectionStatus status, ref RspUserLoginField userLogin, int size1)
         {
-            lock(this)
+            //lock(this)
             {
                 // 断线重连的功能，可能正好与连接上的时间在同一时点，所以想法重新计时
                 _Timer.Enabled = false;
