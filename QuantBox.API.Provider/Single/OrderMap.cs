@@ -104,6 +104,7 @@ namespace QuantBox.APIProvider.Single
                     this.pendingOrders.TryAdd(orderId, new OrderRecord(ordersList[i]));
                     // 记下了本地ID,用于立即撤单时供API来定位
                     this.orderIDs.Add(ordersList[i].Id, orderId);
+                    ordersList[i].Fields[9] = orderId;
                 }
                 ++i;
             }
@@ -125,6 +126,10 @@ namespace QuantBox.APIProvider.Single
                     if (this.workingOrders.TryGetValue(OrderIds[i], out recordList[i])) {
                         pendingCancels[OrderIds[i]] = recordList[i];
                     }
+                }else if (ordersList[i].Fields[9] != null)
+                {
+                    OrderIds[i] = (string)ordersList[i].Fields[9];
+                    recordList[i] = new OrderRecord(ordersList[i]);
                 }
             }
 
