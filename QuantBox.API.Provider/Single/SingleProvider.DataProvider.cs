@@ -111,7 +111,7 @@ namespace QuantBox.APIProvider.Single
         {
             if (IsApiConnected(_MdApi))
             {
-                _MdApi.Log.Info("订阅合约 {0} {1} {2}", record.Instrument.Symbol, record.Symbol, record.Exchange);
+                _MdApi.GetLog().Info("订阅合约 {0} {1} {2}", record.Instrument.Symbol, record.Symbol, record.Exchange);
                 _MdApi.Subscribe(record.Symbol, record.Exchange);
             }
             else
@@ -130,7 +130,7 @@ namespace QuantBox.APIProvider.Single
         {
             if (_MdApi != null)
             {
-                _MdApi.Log.Info("退订合约 {0} {1} {2}", record.Instrument.Symbol, record.Symbol, record.Exchange);
+                _MdApi.GetLog().Info("退订合约 {0} {1} {2}", record.Instrument.Symbol, record.Symbol, record.Exchange);
 
                 _MdApi.Unsubscribe(record.Symbol, record.Exchange);
             }

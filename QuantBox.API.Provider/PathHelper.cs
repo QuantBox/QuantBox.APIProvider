@@ -9,11 +9,11 @@ using System.Reflection;
 
 namespace QuantBox.APIProvider
 {
-    static class Helper
+    static class PathHelper
     {
         public static readonly Uri RootPath;
 
-        static Helper()
+        static PathHelper()
         {
             //Assembly.GetExecutingAssembly().
             RootPath = new Uri(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));

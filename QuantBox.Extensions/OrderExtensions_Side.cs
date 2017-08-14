@@ -10,6 +10,8 @@ namespace QuantBox.Extensions
 {
     public static class OrderExtensions_Side
     {
+        public static int index = OrderTagType.Network;
+
         public static Order LOFCreation(this Order order)
         {
             if (order.Side != SmartQuant.OrderSide.Buy)
@@ -77,14 +79,18 @@ namespace QuantBox.Extensions
 
         public static Order SetSide(this Order order, XAPI.OrderSide side)
         {
-            order.GetDictionary()[OrderTagType.Side] = side;
+            order.GetDictionary(index)[OrderTagType.Side] = (byte)side;
             return order;
         }
 
         public static XAPI.OrderSide? GetSide(this Order order)
         {
-            object obj = order.GetDictionaryValue(OrderTagType.Side);
-            return obj as XAPI.OrderSide?;
+            object obj = order.GetDictionaryValue(OrderTagType.Side, index);
+            if (obj == null)
+            {
+                return (XAPI.OrderSide?)obj;
+            }
+            return (XAPI.OrderSide?)(byte)obj;
         }
     } 
 }

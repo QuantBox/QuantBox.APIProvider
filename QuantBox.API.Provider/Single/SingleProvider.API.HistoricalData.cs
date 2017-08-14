@@ -65,7 +65,7 @@ namespace QuantBox.APIProvider.Single
         {
             int size = Marshal.SizeOf(typeof(TickField));
 
-            (sender as XApi).Log.Info("<--OnRspQryHistoricalTicks:{0},{1},{2},{3}条", request.CurrentDate, request.InstrumentID, request.ExchangeID, size1 / size);
+            (sender as XApi).GetLog().Info("<--OnRspQryHistoricalTicks:{0},{1},{2},{3}条", request.CurrentDate, request.InstrumentID, request.ExchangeID, size1 / size);
             HistoricalDataRecord record;
             if(!historicalDataRecords.TryGetValue(request.RequestId,out record))
                 return;
@@ -178,7 +178,7 @@ namespace QuantBox.APIProvider.Single
         {
             int size = Marshal.SizeOf(typeof(BarField));
 
-            (sender as XApi).Log.Info("<--OnRspQryHistoricalBars:{0},{1},{2},{3}条", request.CurrentDate, request.InstrumentID, request.ExchangeID, size1 / size);
+            (sender as XApi).GetLog().Info("<--OnRspQryHistoricalBars:{0},{1},{2},{3}条", request.CurrentDate, request.InstrumentID, request.ExchangeID, size1 / size);
             HistoricalDataRecord record;
             if (!historicalDataRecords.TryGetValue(request.RequestId, out record))
                 return;

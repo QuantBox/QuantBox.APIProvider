@@ -68,12 +68,12 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRtnQuote_callback(object sender, ref QuoteField quote)
         {
-            (sender as XApi).Log.Debug("OnRtnQuote:" + quote.ToFormattedString());
+            (sender as XApi).GetLog().Debug("OnRtnQuote:" + quote.ToFormattedString());
             try {
                 quoteMap.Process(ref quote);
             }
             catch (Exception ex) {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
 

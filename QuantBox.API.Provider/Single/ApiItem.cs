@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using NLog;
 using QuantBox.APIProvider.UI;
 using XAPI.Callback;
 using System;
@@ -35,11 +34,11 @@ namespace QuantBox.APIProvider.Single
             get {
                 if (ProviderHost.autoMakeRelativePath)
                 {
-                    return Helper.MakeRelativePath(_dllPath);
+                    return PathHelper.MakeRelativePath(_dllPath);
                 }
                 else
                 {
-                    return Helper.MakeAbsolutePath(_dllPath);
+                    return PathHelper.MakeAbsolutePath(_dllPath);
                 }
             }
             set
@@ -47,11 +46,11 @@ namespace QuantBox.APIProvider.Single
                 string tmp_dllPath;
                 if (ProviderHost.autoMakeRelativePath)
                 {
-                    tmp_dllPath = Helper.MakeRelativePath(value);
+                    tmp_dllPath = PathHelper.MakeRelativePath(value);
                 }
                 else
                 {
-                    tmp_dllPath = Helper.MakeAbsolutePath(value);
+                    tmp_dllPath = PathHelper.MakeAbsolutePath(value);
                 }
 
                 // 不一样
@@ -75,12 +74,12 @@ namespace QuantBox.APIProvider.Single
                             // 取公共部分
                             UseType = UseType & Type;
                         }
-                        catch
+                        catch(Exception ex)
                         {
                             Api = null;
                             Type = ApiType.Nono;
-                            Name =  null;
-                            Version = null;
+                            Name =  ex.Message;
+                            Version = "请使用depends检查一下是否缺少依赖";
                             UseType = ApiType.Nono;
                         }
                     }

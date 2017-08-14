@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -30,8 +30,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SmartQuant, Version=1.2.0.0, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
+    <Reference Include="SmartQuant, Version=1.2.0.1, Culture=neutral, PublicKeyToken=023ca4f8a69375d5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\SmartQuant.dll</HintPath>
     </Reference>
@@ -40,9 +43,9 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="XAPI_CSharp, Version=1.4.0.0, Culture=neutral, PublicKeyToken=895da28f5c4589cf, processorArchitecture=MSIL">
+    <Reference Include="XAPI_CSharp, Version=1.5.0.0, Culture=neutral, PublicKeyToken=895da28f5c4589cf, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\XAPI_CSharp.dll</HintPath>
+      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\XAPI_CSharp.exe</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +64,7 @@
     <Compile Include="OrderExtensions_MsgType.cs" />
     <Compile Include="OrderExtensions_HedgeFlagType.cs" />
     <Compile Include="OrderExtensions_OpenCloseType.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TradeEx.cs" />
   </ItemGroup>

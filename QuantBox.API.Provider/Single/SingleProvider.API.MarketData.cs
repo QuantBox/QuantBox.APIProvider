@@ -17,27 +17,8 @@ namespace QuantBox.APIProvider.Single
         private DateTime _dateTime = DateTime.Now;
         private DateTime _exchangeDateTime = DateTime.Now;
 
-        //public ActionBlock<DepthMarketDataField> Input;
-
-        //public void OnInputMarketData(DepthMarketDataField pDepthMarketData)
-        //{
-        //    if (!_tickWriter.Write(ref pDepthMarketData))
-        //    {
-        //        Instrument i = framework.InstrumentManager.Get(pDepthMarketData.Symbol);
-        //        if (i != null)
-        //        {
-        //            _tickWriter.AddInstrument(i);
-        //            _tickWriter.Write(ref pDepthMarketData);
-        //        }
-        //    }
-        //}
         private void OnRtnDepthMarketData_callback(object sender, ref DepthMarketDataNClass pDepthMarketData)
         {
-            //if (_SaveToPd0)
-            //{
-            //    Input.Post(pDepthMarketData);
-            //}
-
             if (!_enableEmitData)
                 return;
 
@@ -48,11 +29,6 @@ namespace QuantBox.APIProvider.Single
                 MarketDataRecord record;
                 if (!marketDataRecords.TryGetValue(pDepthMarketData.Symbol, out record))
                 {
-                    //if (!marketDataRecords.TryGetValue(pDepthMarketData.InstrumentID, out record))
-                    //{
-                    //    //(sender as XApi).Log.Warn("合约 {0} {1} 不在订阅列表中却收到了数据", pDepthMarketData.Symbol, pDepthMarketData.InstrumentID);
-                    //    return;
-                    //}
                     return;
                 }
 
@@ -70,7 +46,7 @@ namespace QuantBox.APIProvider.Single
                 catch
                 {
                     _exchangeDateTime = _dateTime;
-                    (sender as XApi).Log.Error("{0} ExchangeDateTime有误，现使用LocalDateTime代替，请找API开发人员处理API中的时间兼容问题。", pDepthMarketData.ToFormattedStringExchangeDateTime());
+                    (sender as XApi).GetLog().Error("{0} ExchangeDateTime有误，现使用LocalDateTime代替，请找API开发人员处理API中的时间兼容问题。", pDepthMarketData.ToFormattedStringExchangeDateTime());
                 }
 
 
@@ -95,7 +71,7 @@ namespace QuantBox.APIProvider.Single
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
 

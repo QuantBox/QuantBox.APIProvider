@@ -9,15 +9,17 @@ namespace QuantBox.Extensions
 {
     public static class OrderExtensions_CancelCount
     {
+        public static int index = OrderTagType.Local;
+
         public static Order SetCancelCount(this Order order, int count)
         {
-            order.GetDictionary()[OrderTagType.CancelCount] = count;
+            order.GetDictionary(index)[OrderTagType.CancelCount] = count;
             return order;
         }
 
         public static int GetCancelCount(this Order order)
         {
-            return order.GetDictionaryInt(OrderTagType.CancelCount);
+            return order.GetDictionaryInt(OrderTagType.CancelCount, index);
         }
     } 
 }

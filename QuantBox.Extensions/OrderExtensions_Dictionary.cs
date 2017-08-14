@@ -9,46 +9,35 @@ namespace QuantBox.Extensions
 {
     public static class OrderExtensions_Dictionary
     {
-        //public static Order SetDictionary(this Order order, string account)
-        //{
-        //    order[OrderTagType.Account] = account;
-        //    return order;
-        //}
-
-        public static Dictionary<int,object> GetDictionary(this Order order)
+        public static ObjectTable GetDictionary(this Order order,int index = OrderTagType.Network)
         {
-            object obj = order[OrderTagType.Zero];
+            var obj = order[index];
             if (obj == null)
             {
-                obj = new Dictionary<int, object>();
-                order[OrderTagType.Zero] = obj;
+                obj = new ObjectTable();
+                order[index] = obj;
             }
-            return obj as Dictionary<int,object>;
+            return obj as ObjectTable;
         }
 
-        public static object GetDictionaryValue(this Order order,int key)
+        public static object GetDictionaryValue(this Order order,int key, int index = OrderTagType.Network)
         {
-            object value = null;
-            order.GetDictionary().TryGetValue(key, out value);
-            return value;
+            return order.GetDictionary(index)[key];
         }
 
-        public static double GetDictionaryDouble(this Order order, int key)
+        public static double GetDictionaryDouble(this Order order, int key, int index = OrderTagType.Network)
         {
-            object value = null;
-            order.GetDictionary().TryGetValue(key, out value);
-            if (value == null)
-                return 0;
-            return (double)value;
+            return order.GetDictionary(index).GetDouble(key);
         }
 
-        public static int GetDictionaryInt(this Order order, int key)
+        public static int GetDictionaryInt(this Order order, int key, int index = OrderTagType.Network)
         {
-            object value = null;
-            order.GetDictionary().TryGetValue(key, out value);
-            if (value == null)
-                return 0;
-            return (int)value;
+            return order.GetDictionary(index).GetInt(key);
+        }
+
+        public static string GetDictionaryString(this Order order, int key, int index = OrderTagType.Network)
+        {
+            return order.GetDictionary(index).GetString(key);
         }
     } 
 }

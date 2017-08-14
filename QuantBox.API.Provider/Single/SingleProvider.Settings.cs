@@ -22,9 +22,7 @@ namespace QuantBox.APIProvider.Single
         private const string CATEGORY_QUOTE_REQUEST = "Settings - QuoteRequest";
         private const string CATEGORY_INSTRUMENT = "Settings - Instrument";
         private const string CATEGORY_HISTORICAL_DATA = "Settings - HistoricalData";
-
-
-        //private bool _SaveToPd0;
+        
         private bool _enableEmitData;
         private bool _emitBidAsk;
         private bool _emitBidAskFirst;
@@ -56,17 +54,7 @@ namespace QuantBox.APIProvider.Single
             get { return _emitBidAskFirst; }
             set { _emitBidAskFirst = value; }
         }
-        //[Category(CATEGORY_MARKETDATA)]
-        //[Description("【行情】将实时行情保存成pd0行情格式")]
-        //public bool SaveToPd0
-        //{
-        //    get { return _SaveToPd0; }
-        //    set { _SaveToPd0 = value; }
-        //}
-        //[Category(CATEGORY_MARKETDATA)]
-        //[Description("配置文件路径")]
-        //[Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
-        //public string Pd0Path { get; set; }
+
         #endregion
 
         #region 合约配置

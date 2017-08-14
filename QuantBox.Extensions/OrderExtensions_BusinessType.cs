@@ -10,16 +10,22 @@ namespace QuantBox.Extensions
 {
     public static class OrderExtensions_BusinessType
     {
+        public static int index = OrderTagType.Network;
+
         public static Order SetBusinessType(this Order order, BusinessType business)
         {
-            order.GetDictionary()[OrderTagType.Business] = business;
+            order.GetDictionary(index)[OrderTagType.Business] = (byte)business;
             return order;
         }
 
         public static BusinessType? GetBusinessType(this Order order)
         {
-            object obj = order.GetDictionaryValue(OrderTagType.Business);
-            return obj as BusinessType?;
+            object obj = order.GetDictionaryValue(OrderTagType.Business, index);
+            if (obj == null)
+            {
+                return (BusinessType?)obj;
+            }
+            return (BusinessType?)(byte)obj;
         }
     }
 }

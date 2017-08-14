@@ -9,7 +9,6 @@ using QuantBox.Extensions;
 
 using XAPI.Callback;
 using XAPI;
-using NLog;
 using Newtonsoft.Json;
 
 using SQ = SmartQuant;
@@ -46,7 +45,7 @@ namespace QuantBox.APIProvider.Single
         //        && 0 == LowerLimitPrice)
         //    {
         //        //涨跌停无效
-                
+
         //    }
         //    else
         //    {
@@ -59,7 +58,7 @@ namespace QuantBox.APIProvider.Single
         //    return price;
         //}
 
-        public double FixPrice(MarketDataRecord record,double price, SmartQuant.OrderSide Side, double tickSize)
+        public double FixPrice(MarketDataRecord record, double price, SmartQuant.OrderSide Side, double tickSize)
         {
             double LowerLimitPrice = record.DepthMarket.LowerLimitPrice;
             double UpperLimitPrice = record.DepthMarket.UpperLimitPrice;
@@ -89,8 +88,8 @@ namespace QuantBox.APIProvider.Single
                 && 0 == LowerLimitPrice)
             {
                 //涨跌停无效
-                _TdApi.Log.Warn("Symbol:{0},Symbol_Dot_Exchange:{1},LowerLimitPrice && UpperLimitPrice 为0,没有进行价格修正",
-                    record.Symbol,record.Symbol_Dot_Exchange);
+                _TdApi.GetLog().Warn("Symbol:{0},Symbol_Dot_Exchange:{1},LowerLimitPrice && UpperLimitPrice 为0,没有进行价格修正",
+                    record.Symbol, record.Symbol_Dot_Exchange);
             }
             else
             {
@@ -199,7 +198,7 @@ namespace QuantBox.APIProvider.Single
             MarketDataRecord record;
             if (marketDataRecords.TryGetValue(command.Instrument.Symbol, out record))
             {
-                switch(command.OrdType)
+                switch (command.OrdType)
                 {
                     case SQ.OrderType.Market:
                     case SQ.OrderType.MarketOnClose:
@@ -216,7 +215,7 @@ namespace QuantBox.APIProvider.Single
                             }
 
                             // 市价单使用限价单模拟
-                            if(SwitchMakertOrderToLimitOrder)
+                            if (SwitchMakertOrderToLimitOrder)
                             {
                                 fields[0].Type = XAPI.OrderType.Limit;
                             }
@@ -226,9 +225,9 @@ namespace QuantBox.APIProvider.Single
                 if (HasPriceLimit)
                 {
                     //price = FixPrice(price, command.Side, apiTickSize, record.DepthMarket.LowerLimitPrice, record.DepthMarket.UpperLimitPrice);
-                    price = FixPrice(record,price, command.Side, apiTickSize);
+                    price = FixPrice(record, price, command.Side, apiTickSize);
                 }
-                
+
                 fields[0].Price = price;
             }
 
@@ -260,6 +259,71 @@ namespace QuantBox.APIProvider.Single
             orderMap.DoOrderSend(ref fields, orders);
         }
 
+        private void SubSide2OpenClose(ref OrderField field, Order order)
+        {
+            // 由于无法指定平今与平昨，所以废弃
+            if (framework.Configuration.UseSubPositions)
+            {
+                switch (order.SubSide)
+                {
+                    case SubSide.Undefined:
+                        field.OpenClose = order.Side == SQ.OrderSide.Buy ? OpenCloseType.Open : OpenCloseType.Close;
+                        break;
+                    case SubSide.BuyCover:
+                        field.OpenClose = OpenCloseType.Close;
+                        break;
+                    case SubSide.SellShort:
+                        field.OpenClose = OpenCloseType.Open;
+                        break;
+                }
+            }
+            else
+            {
+                // 前面已经处理过了
+                // field.OpenClose = GetOpenClose(order);
+            }
+        }
+
+        private void OpenClose2SubSide(ref OrderField field, Order order)
+        {
+            //多头
+            //Buy 就是开
+            //Sell 就是平 SubSide 是 Undefined
+
+            //空头
+            //Sell 加 SubSide = SellShort 是开仓
+            //Buy 加 SubSide = BuyCover 是平仓
+
+            // 由于使用官方的办法无法指定平今与平昨，所以还是用以前的开平仓的写法
+            // 区别只是官方维护了双向持仓
+            if (order.Side == SQ.OrderSide.Buy)
+            {
+                switch (field.OpenClose)
+                {
+                    case OpenCloseType.Open:
+                        order.SubSide = SubSide.Undefined;
+                        break;
+                    case OpenCloseType.Close:
+                    case OpenCloseType.CloseToday:
+                        order.SubSide = SubSide.BuyCover;
+                        break;
+                }
+            }
+            else
+            {
+                switch (field.OpenClose)
+                {
+                    case OpenCloseType.Open:
+                        order.SubSide = SubSide.SellShort;
+                        break;
+                    case OpenCloseType.Close:
+                    case OpenCloseType.CloseToday:
+                        order.SubSide = SubSide.Undefined;
+                        break;
+                }
+            }
+        }
+
         private void ToOrderStruct(ref OrderField field, Order order, string apiSymbol, string apiExchange)
         {
             field.InstrumentID = apiSymbol;
@@ -279,31 +343,33 @@ namespace QuantBox.APIProvider.Single
             field.PortfolioID2 = GetPortfolioID2(order);
             field.PortfolioID3 = GetPortfolioID3(order);
             field.Business = GetBusiness(order);
+
+            OpenClose2SubSide(ref field, order);
         }
 
         private void OnRtnOrder_callback(object sender, ref OrderField order)
         {
-            (sender as XApi).Log.Debug("OnRtnOrder:" + order.ToFormattedString());
+            (sender as XApi).GetLog().Debug("OnRtnOrder:" + order.ToFormattedString());
             try
             {
                 orderMap.Process(ref order);
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
 
         private void OnRtnTrade_callback(object sender, ref TradeField trade)
         {
-            (sender as XApi).Log.Debug("OnRtnTrade:" + trade.ToFormattedString());
+            (sender as XApi).GetLog().Debug("OnRtnTrade:" + trade.ToFormattedString());
             try
             {
                 orderMap.Process(ref trade);
             }
             catch (Exception ex)
             {
-                (sender as XApi).Log.Error(ex);
+                (sender as XApi).GetLog().Error(ex);
             }
         }
     }
