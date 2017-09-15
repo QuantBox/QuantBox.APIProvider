@@ -20,7 +20,7 @@ namespace QuantBox.APIProvider.Single
 
         private void ReturnInstrumentDefinition(InstrumentDefinitionRequest request)
         {
-            Dictionary<string,List<string>> dict = new Dictionary<string,List<string>>();
+            Dictionary<string, List<string>> dict = new Dictionary<string, List<string>>();
 
             List<Instrument> instruments = new List<Instrument>();
 
@@ -92,19 +92,19 @@ namespace QuantBox.APIProvider.Single
                 description.Underlying = contract.UnderlyingInstrID;
                 instrument.Description = JsonConvert.SerializeObject(description, description.GetType(), null);
 
-                
-                if(!string.IsNullOrWhiteSpace(contract.UnderlyingInstrID))
+
+                if (!string.IsNullOrWhiteSpace(contract.UnderlyingInstrID))
                 {
                     // 要求先导入标的合约，再导入期权，如果在这里生成会丢失合约信息
                     Instrument UnderlyingInstrID = framework.InstrumentManager.Get(contract.UnderlyingInstrID);
-                    if(UnderlyingInstrID == null)
+                    if (UnderlyingInstrID == null)
                     {
                         //xlog.Warn("合约:{0},存在标的物字段，请先导入标的物合约{1},导入后放在Parent属性中", contract.Symbol, contract.UnderlyingInstrID);
                         List<string> list = null;
-                        if(!dict.TryGetValue(contract.UnderlyingInstrID,out list))
+                        if (!dict.TryGetValue(contract.UnderlyingInstrID, out list))
                         {
                             list = new List<string>();
-                            dict.Add(contract.UnderlyingInstrID,list);
+                            dict.Add(contract.UnderlyingInstrID, list);
                         }
                         list.Add(contract.Symbol);
                     }
@@ -120,6 +120,8 @@ namespace QuantBox.APIProvider.Single
                     int yyyy = contract.ExpireDate / 10000;
                     int MM = contract.ExpireDate % 10000 / 100;
                     int dd = contract.ExpireDate % 100;
+                    // 居然有期权传回来的到期时间没有日
+                    dd = Math.Max(dd, 1);
                     instrument.Maturity = new DateTime(yyyy, MM, dd);
                 }
 
@@ -131,7 +133,7 @@ namespace QuantBox.APIProvider.Single
                 instruments.Add(instrument);
             }
 
-            if(dict.Count>0)
+            if (dict.Count > 0)
             {
                 xlog.Warn("标的物合约必须先导入,然后再Request,衍生品合约的Legs才会有一条记录指向标的物");
                 foreach (var kv in dict)
@@ -141,7 +143,7 @@ namespace QuantBox.APIProvider.Single
                 xlog.Warn("请将以上合约先导入");
                 xlog.Warn("如果在Request后列表中没有标的物合约，则需要手工添加");
             }
-            
+
 
             instruments.Sort(SortInstrument);
 

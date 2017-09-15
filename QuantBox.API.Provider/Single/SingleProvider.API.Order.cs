@@ -259,70 +259,70 @@ namespace QuantBox.APIProvider.Single
             orderMap.DoOrderSend(ref fields, orders);
         }
 
-        private void SubSide2OpenClose(ref OrderField field, Order order)
-        {
-            // 由于无法指定平今与平昨，所以废弃
-            if (framework.Configuration.UseSubPositions)
-            {
-                switch (order.SubSide)
-                {
-                    case SubSide.Undefined:
-                        field.OpenClose = order.Side == SQ.OrderSide.Buy ? OpenCloseType.Open : OpenCloseType.Close;
-                        break;
-                    case SubSide.BuyCover:
-                        field.OpenClose = OpenCloseType.Close;
-                        break;
-                    case SubSide.SellShort:
-                        field.OpenClose = OpenCloseType.Open;
-                        break;
-                }
-            }
-            else
-            {
-                // 前面已经处理过了
-                // field.OpenClose = GetOpenClose(order);
-            }
-        }
+        //private void SubSide2OpenClose(ref OrderField field, Order order)
+        //{
+        //    // 由于无法指定平今与平昨，所以废弃
+        //    if (framework.Configuration.UseSubPositions)
+        //    {
+        //        switch (order.SubSide)
+        //        {
+        //            case SubSide.Undefined:
+        //                field.OpenClose = order.Side == SQ.OrderSide.Buy ? OpenCloseType.Open : OpenCloseType.Close;
+        //                break;
+        //            case SubSide.BuyCover:
+        //                field.OpenClose = OpenCloseType.Close;
+        //                break;
+        //            case SubSide.SellShort:
+        //                field.OpenClose = OpenCloseType.Open;
+        //                break;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // 前面已经处理过了
+        //        // field.OpenClose = GetOpenClose(order);
+        //    }
+        //}
 
-        private void OpenClose2SubSide(ref OrderField field, Order order)
-        {
-            //多头
-            //Buy 就是开
-            //Sell 就是平 SubSide 是 Undefined
+        //private void OpenClose2SubSide(ref OrderField field, Order order)
+        //{
+        //    //多头
+        //    //Buy 就是开
+        //    //Sell 就是平 SubSide 是 Undefined
 
-            //空头
-            //Sell 加 SubSide = SellShort 是开仓
-            //Buy 加 SubSide = BuyCover 是平仓
+        //    //空头
+        //    //Sell 加 SubSide = SellShort 是开仓
+        //    //Buy 加 SubSide = BuyCover 是平仓
 
-            // 由于使用官方的办法无法指定平今与平昨，所以还是用以前的开平仓的写法
-            // 区别只是官方维护了双向持仓
-            if (order.Side == SQ.OrderSide.Buy)
-            {
-                switch (field.OpenClose)
-                {
-                    case OpenCloseType.Open:
-                        order.SubSide = SubSide.Undefined;
-                        break;
-                    case OpenCloseType.Close:
-                    case OpenCloseType.CloseToday:
-                        order.SubSide = SubSide.BuyCover;
-                        break;
-                }
-            }
-            else
-            {
-                switch (field.OpenClose)
-                {
-                    case OpenCloseType.Open:
-                        order.SubSide = SubSide.SellShort;
-                        break;
-                    case OpenCloseType.Close:
-                    case OpenCloseType.CloseToday:
-                        order.SubSide = SubSide.Undefined;
-                        break;
-                }
-            }
-        }
+        //    // 由于使用官方的办法无法指定平今与平昨，所以还是用以前的开平仓的写法
+        //    // 区别只是官方维护了双向持仓
+        //    if (order.Side == SQ.OrderSide.Buy)
+        //    {
+        //        switch (field.OpenClose)
+        //        {
+        //            case OpenCloseType.Open:
+        //                order.SubSide = SubSide.Undefined;
+        //                break;
+        //            case OpenCloseType.Close:
+        //            case OpenCloseType.CloseToday:
+        //                order.SubSide = SubSide.BuyCover;
+        //                break;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        switch (field.OpenClose)
+        //        {
+        //            case OpenCloseType.Open:
+        //                order.SubSide = SubSide.SellShort;
+        //                break;
+        //            case OpenCloseType.Close:
+        //            case OpenCloseType.CloseToday:
+        //                order.SubSide = SubSide.Undefined;
+        //                break;
+        //        }
+        //    }
+        //}
 
         private void ToOrderStruct(ref OrderField field, Order order, string apiSymbol, string apiExchange)
         {
@@ -344,7 +344,7 @@ namespace QuantBox.APIProvider.Single
             field.PortfolioID3 = GetPortfolioID3(order);
             field.Business = GetBusiness(order);
 
-            OpenClose2SubSide(ref field, order);
+            //OpenClose2SubSide(ref field, order);
         }
 
         private void OnRtnOrder_callback(object sender, ref OrderField order)
