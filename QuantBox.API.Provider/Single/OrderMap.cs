@@ -249,7 +249,7 @@ namespace QuantBox.APIProvider.Single
             }
             else
             {
-                log.Warn("Trade,找不到订单，workingOrders.Count={0}", workingOrders.Count);
+                // log.Warn("Trade,找不到订单，workingOrders.Count={0}", workingOrders.Count);
             }
         }
 
