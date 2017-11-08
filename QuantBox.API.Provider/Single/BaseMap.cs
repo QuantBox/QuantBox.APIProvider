@@ -27,20 +27,20 @@ namespace QuantBox.APIProvider.Single
             SQ.ExecType? execType,
             SQ.OrderStatus? orderStatus)
         {
-            ExecutionReport report = new ExecutionReport();
+            ExecutionReport report = new ExecutionReport(record.Order);
 
             report.DateTime = framework.Clock.DateTime;
 
-            report.Order = record.Order;
-            report.Instrument = record.Order.Instrument;
+            //report.Order = record.Order;
+            //report.Instrument = record.Order.Instrument;
             
-            report.Side = record.Order.Side;
-            report.OrdType = record.Order.Type;
-            report.TimeInForce = record.Order.TimeInForce;
+            //report.Side = record.Order.Side;
+            //report.OrdType = record.Order.Type;
+            //report.TimeInForce = record.Order.TimeInForce;
 
-            report.OrdQty = record.Order.Qty;
-            report.Price = record.Order.Price;
-            report.StopPx = record.Order.StopPx;
+            //report.OrdQty = record.Order.Qty;
+            //report.Price = record.Order.Price;
+            //report.StopPx = record.Order.StopPx;
 
             report.AvgPx = record.AvgPx;
             report.CumQty = record.CumQty;

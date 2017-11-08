@@ -19,8 +19,13 @@ namespace QuantBox.APIProvider.Single
         static SingleProvider() {
             NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(Path.Combine(PathHelper.RootPath.LocalPath, "NLog.config"), true);
         }
+        public DelegateOnRspQryInvestorPosition OnRspQryInvestorPosition { get; set; }
+        public DelegateOnRspQryTradingAccount OnRspQryTradingAccount { get; set; }
+        public DelegateOnRtnInstrumentStatus OnRtnInstrumentStatus { get; set; }
+
         //记录合约列表,从实盘合约名到对象的映射
         private readonly Dictionary<string, InstrumentField> _dictInstruments = new Dictionary<string, InstrumentField>();
+        private readonly Dictionary<string, InstrumentStatusField> _dictInstrumentsStatus = new Dictionary<string, InstrumentStatusField>();
 
         public static int GetDate(DateTime dt)
         {
@@ -62,6 +67,10 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRspQryTradingAccount_callback(object sender, ref AccountField account, int size1, bool bIsLast)
         {
+            // 由策略来收回报
+            if (OnRspQryTradingAccount != null)
+                OnRspQryTradingAccount(sender, ref account, size1, bIsLast);
+
             if (size1 <= 0)
             {
                 (sender as XApi).GetLog().Info("OnRspQryTradingAccount");
@@ -112,6 +121,10 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRspQryInvestorPosition_callback(object sender, ref PositionField position, int size1, bool bIsLast)
         {
+            // 由策略来收回报
+            if (OnRspQryInvestorPosition != null)
+                OnRspQryInvestorPosition(sender, ref position, size1, bIsLast);
+
             if (size1 <= 0)
             {
                 (sender as XApi).GetLog().Info("OnRspQryInvestorPosition");
@@ -153,7 +166,7 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        private void OnRspQrySettlementInfo(object sender, ref SettlementInfoClass settlementInfo, int size1, bool bIsLast)
+        private void OnRspQrySettlementInfo_callback(object sender, ref SettlementInfoClass settlementInfo, int size1, bool bIsLast)
         {
             if (size1 <= 0)
             {
@@ -199,6 +212,27 @@ namespace QuantBox.APIProvider.Single
             }
 
             (sender as XApi).GetLog().Info("OnRspQryOrder:" + order.ToFormattedString());
+        }
+
+        private void OnRtnInstrumentStatus_callback(object sender, ref InstrumentStatusField instrumentStatus)
+        {
+            if (OnRtnInstrumentStatus != null)
+                OnRtnInstrumentStatus(sender, ref instrumentStatus);
+
+            // 记录下来，后期可能要用到
+            _dictInstrumentsStatus[instrumentStatus.Symbol] = instrumentStatus;
+
+            (sender as XApi).GetLog().Info("OnRtnInstrumentStatus:" + instrumentStatus.ToFormattedString());
+        }
+
+        public InstrumentStatusField GetInstrumentStatus(string symbol)
+        {
+            InstrumentStatusField instrumentStatus;
+            if(_dictInstrumentsStatus.TryGetValue(symbol,out instrumentStatus))
+            {
+                return instrumentStatus;
+            }
+            return instrumentStatus;
         }
     }
 }

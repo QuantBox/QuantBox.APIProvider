@@ -412,7 +412,8 @@ namespace QuantBox.APIProvider.Single
                 api.OnRspQryHistoricalTicks = OnRspQryHistoricalTicks_callback;
                 api.OnRspQryHistoricalBars = OnRspQryHistoricalBars_callback;
 
-                api.OnRspQrySettlementInfo = OnRspQrySettlementInfo;
+                api.OnRspQrySettlementInfo = OnRspQrySettlementInfo_callback;
+                api.OnRtnInstrumentStatus = OnRtnInstrumentStatus_callback;
 
                 api.Connect();
 

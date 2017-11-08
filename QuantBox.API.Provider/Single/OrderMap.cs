@@ -25,8 +25,10 @@ namespace QuantBox.APIProvider.Single
         private OrderRecord GetExternalOrder(ref TradeField field)
         {
             ExternalOrderRecord record;
-            if (externalOrders.TryGetValue(field.InstrumentID, out record)) {
-                if (field.OpenClose == OpenCloseType.Open) {
+            if (externalOrders.TryGetValue(field.InstrumentID, out record))
+            {
+                if (field.OpenClose == OpenCloseType.Open)
+                {
                     return field.Side == XAPI.OrderSide.Buy ? record.BuyOpen : record.SellOpen;
                 }
                 return field.Side == XAPI.OrderSide.Buy ? record.BuyClose : record.SellClose;
@@ -38,21 +40,25 @@ namespace QuantBox.APIProvider.Single
             var orderRecord = new OrderRecord(order);
             ExternalOrderRecord record = new ExternalOrderRecord();
             record = externalOrders.GetOrAdd(order.Instrument.Symbol, record);
-            if (field.OpenClose == OpenCloseType.Open) {
+            if (field.OpenClose == OpenCloseType.Open)
+            {
                 if (field.Side == XAPI.OrderSide.Buy)
                 {
                     record.BuyOpen = orderRecord;
                 }
-                else {
+                else
+                {
                     record.SellOpen = orderRecord;
                 }
             }
-            else {
+            else
+            {
                 if (field.Side == XAPI.OrderSide.Buy)
                 {
                     record.BuyClose = orderRecord;
                 }
-                else {
+                else
+                {
                     record.SellClose = orderRecord;
                 }
             }
@@ -77,10 +83,12 @@ namespace QuantBox.APIProvider.Single
 
         public void DoOrderSend(ref OrderField[] ordersArray, Order order)
         {
-            if (Convert.ToInt32(order.Qty) == int.MaxValue) {
+            if (Convert.ToInt32(order.Qty) == int.MaxValue)
+            {
                 SetExternalOrder(order, ref ordersArray[0]);
             }
-            else {
+            else
+            {
                 DoOrderSend(ref ordersArray, new List<Order>() { order });
             }
         }
@@ -101,6 +109,7 @@ namespace QuantBox.APIProvider.Single
                 }
                 else
                 {
+                    //Console.WriteLine(orderId);
                     this.pendingOrders.TryAdd(orderId, new OrderRecord(ordersList[i]));
                     // 记下了本地ID,用于立即撤单时供API来定位
                     this.orderIDs.Add(ordersList[i].Id, orderId);
@@ -120,13 +129,17 @@ namespace QuantBox.APIProvider.Single
             OrderRecord[] recordList = new OrderRecord[ordersList.Count];
             string[] OrderIds = new string[ordersList.Count];
 
-            for (int i = 0; i < ordersList.Count; ++i) {
+            for (int i = 0; i < ordersList.Count; ++i)
+            {
                 // 如果需要下单的过程中撤单，这里有可能返回LocalID或ID
-                if (orderIDs.TryGetValue(ordersList[i].Id, out OrderIds[i])) {
-                    if (this.workingOrders.TryGetValue(OrderIds[i], out recordList[i])) {
+                if (orderIDs.TryGetValue(ordersList[i].Id, out OrderIds[i]))
+                {
+                    if (this.workingOrders.TryGetValue(OrderIds[i], out recordList[i]))
+                    {
                         pendingCancels[OrderIds[i]] = recordList[i];
                     }
-                }else if (ordersList[i].Fields[9] != null)
+                }
+                else if (ordersList[i].Fields[9] != null)
                 {
                     OrderIds[i] = (string)ordersList[i].Fields[9];
                     recordList[i] = new OrderRecord(ordersList[i]);
@@ -142,14 +155,17 @@ namespace QuantBox.APIProvider.Single
                 {
                     if (!string.IsNullOrEmpty(e) && e != "0")
                     {
-                        EmitExecutionReport(recordList[i], SQ.ExecType.ExecCancelReject, recordList[i].Order.Status, "ErrorCode:" + e);
+                        if(recordList[i] != null)
+                        {
+                            EmitExecutionReport(recordList[i], SQ.ExecType.ExecCancelReject, recordList[i].Order.Status, "ErrorCode:" + e);
+                        }
                     }
                     ++i;
                 }
             }
         }
 
-        public void Process(ref OrderField order)
+        public void Process(ref OrderField order, NLog.Logger log)
         {
             // 所有的成交信息都不处理，交给TradeField处理
             if (order.ExecType == XAPI.ExecType.Trade)
@@ -157,13 +173,19 @@ namespace QuantBox.APIProvider.Single
 
             OrderRecord record;
 
-            switch (order.ExecType) {
+            switch (order.ExecType)
+            {
                 case XAPI.ExecType.New:
-                    if (this.pendingOrders.TryRemove(order.LocalID, out record)) {
+                    if (this.pendingOrders.TryRemove(order.LocalID, out record))
+                    {
                         this.workingOrders.Add(order.ID, record);
                         // 将LocalID更新为ID
                         this.orderIDs[record.Order.Id] = order.ID;
                         EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status);
+                    }
+                    else
+                    {
+                        //log.Warn("New,找不到订单，pendingOrders.Count={0}", pendingOrders.Count);
                     }
                     break;
                 case XAPI.ExecType.Rejected:
@@ -172,7 +194,8 @@ namespace QuantBox.APIProvider.Single
                         orderIDs.Remove(record.Order.Id);
                         EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
                     }
-                    else if (this.workingOrders.TryGetValue(order.ID, out record)) {
+                    else if (this.workingOrders.TryGetValue(order.ID, out record))
+                    {
                         // 比如说出现超出涨跌停时，先会到ProcessNew，所以得再多判断一次
                         workingOrders.Remove(order.ID);
                         orderIDs.Remove(record.Order.Id);
@@ -180,7 +203,8 @@ namespace QuantBox.APIProvider.Single
                     }
                     break;
                 case XAPI.ExecType.Cancelled:
-                    if (this.workingOrders.TryGetValue(order.ID, out record)) {
+                    if (this.workingOrders.TryGetValue(order.ID, out record))
+                    {
                         workingOrders.Remove(order.ID);
                         orderIDs.Remove(record.Order.Id);
                         EmitExecutionReport(record, SQ.ExecType.ExecCancelled, SQ.OrderStatus.Cancelled);
@@ -192,25 +216,29 @@ namespace QuantBox.APIProvider.Single
                     }
                     break;
                 case XAPI.ExecType.PendingCancel:
-                    if (this.workingOrders.TryGetValue(order.ID, out record)) {
+                    if (this.workingOrders.TryGetValue(order.ID, out record))
+                    {
                         EmitExecutionReport(record, SQ.ExecType.ExecPendingCancel, SQ.OrderStatus.PendingCancel);
                     }
                     break;
                 case XAPI.ExecType.CancelReject:
-                    if (this.pendingCancels.TryRemove(order.ID, out record)) {
+                    if (this.pendingCancels.TryRemove(order.ID, out record))
+                    {
                         EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
                     }
                     break;
             }
         }
 
-        public void Process(ref TradeField trade)
+        public void Process(ref TradeField trade, NLog.Logger log)
         {
             OrderRecord record;
-            if (!workingOrders.TryGetValue(trade.ID, out record)) {
+            if (!workingOrders.TryGetValue(trade.ID, out record))
+            {
                 record = GetExternalOrder(ref trade);
             }
-            if (record != null) {
+            if (record != null)
+            {
                 record.AddFill(trade.Price, (int)trade.Qty);
                 SQ.ExecType execType = SQ.ExecType.ExecTrade;
                 SQ.OrderStatus orderStatus = (record.LeavesQty > 0) ? SQ.OrderStatus.PartiallyFilled : SQ.OrderStatus.Filled;
@@ -218,6 +246,10 @@ namespace QuantBox.APIProvider.Single
                 report.LastPx = trade.Price;
                 report.LastQty = trade.Qty;
                 provider.EmitExecutionReport(report);
+            }
+            else
+            {
+                log.Warn("Trade,找不到订单，workingOrders.Count={0}", workingOrders.Count);
             }
         }
 
