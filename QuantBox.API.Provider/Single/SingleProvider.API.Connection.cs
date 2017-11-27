@@ -147,11 +147,15 @@ namespace QuantBox.APIProvider.Single
                     if (SessionTimeList == null || SessionTimeList.Count == 0)
                         break;
 
+                    var stl = SessionTimeList.Where(x => x.Enable).ToList();
+                    if (stl.Count == 0)
+                        break;
+
                     bool bTryConnect = true;
 
                     SessionTimeItem st_current = null;
                     SessionTimeItem st_next = null;
-                    foreach (var st in SessionTimeList.ToList())
+                    foreach (var st in stl)
                     {
                         // 如果当前时间在交易范围内，要开启重连
                         // 如果当前时间不在交易范围内，要主动断开
