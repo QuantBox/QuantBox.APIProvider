@@ -64,8 +64,9 @@ namespace QuantBox.APIProvider.Single
             // 以下初始化的值在，初始化后由软件读取文件中的参数据后又设置回来
             LastPricePlusNTicks = 10;
             EmitBidAsk = true;
+            EmitLevel2Snapshot = false;
             //UpdateInstrument = true;
-            EnableEmitHistoricalData = true;
+            EmitHistoricalData = true;
             FilterDateTime = true;
             EnableEmitData = true;
             HasPriceLimit = true;
@@ -188,7 +189,7 @@ namespace QuantBox.APIProvider.Single
         private int _QueryAccountCount = 0;
         private int _QueryPositionCount = 0;
 
-        public override void Connect()
+        protected override void OnConnect()
         {
             _QueryAccountCount = _QueryAccountInterval;
             _QueryPositionCount = _QueryPositionInterval;
@@ -203,7 +204,7 @@ namespace QuantBox.APIProvider.Single
             xlog.Info("重连检测定时器开启，检测频率(毫秒):{0}", _Timer.Interval);
             _Connect(true);
         }
-        public override void Disconnect()
+        protected override void OnDisconnect()
         {
             // 关闭重连定时器
             _Timer.Elapsed -= _Timer_Elapsed;

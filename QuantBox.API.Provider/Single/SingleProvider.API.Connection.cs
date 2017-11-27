@@ -156,6 +156,9 @@ namespace QuantBox.APIProvider.Single
                         // 如果当前时间在交易范围内，要开启重连
                         // 如果当前时间不在交易范围内，要主动断开
                         TimeSpan ts = e.SignalTime.TimeOfDay;
+                        if (!st.Enable)
+                            continue;
+
                         if (ts < st.SessionStart)
                         {
                             // 停

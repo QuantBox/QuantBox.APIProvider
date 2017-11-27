@@ -26,6 +26,7 @@ namespace QuantBox.APIProvider.Single
         private bool _enableEmitData;
         private bool _emitBidAsk;
         private bool _emitBidAskFirst;
+        private bool _emitLevel2Snapshot;
 
 
         #region 行情配置
@@ -53,6 +54,13 @@ namespace QuantBox.APIProvider.Single
         {
             get { return _emitBidAskFirst; }
             set { _emitBidAskFirst = value; }
+        }
+        [Category(CATEGORY_MARKETDATA)]
+        [Description("【行情】触发OnLevel2Snapshot事件")]
+        public bool EmitLevel2Snapshot
+        {
+            get { return _emitLevel2Snapshot; }
+            set { _emitLevel2Snapshot = value; }
         }
 
         #endregion
@@ -173,7 +181,7 @@ namespace QuantBox.APIProvider.Single
         [Category(CATEGORY_HISTORICAL_DATA)]
         [Description("【历史】是否触发EmitHistoricalData事件")]
         [DisplayName("EmitHistoricalData")]
-        public bool EnableEmitHistoricalData { get; set; }
+        public bool EmitHistoricalData { get; set; }
 
         [Category(CATEGORY_HISTORICAL_DATA)]
         [Description("【历史】是否过滤数据日期和时间")]

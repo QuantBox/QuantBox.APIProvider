@@ -68,6 +68,11 @@ namespace QuantBox.APIProvider.Single
                         FireAsk(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
                     }
                 }
+
+                if (_emitLevel2Snapshot)
+                {
+                    FireLevel2Snapshot(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                }
             }
             catch (Exception ex)
             {
@@ -75,7 +80,7 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        private void FireTrade(int InstrumentId,DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData,DepthMarketDataNClass DepthMarket)
+        private void FireTrade(int InstrumentId, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
         {
             //行情过来时是今天累计成交量，得转换成每个tick中成交量之差
             double volume = pDepthMarketData.Volume - DepthMarket.Volume;
@@ -98,11 +103,70 @@ namespace QuantBox.APIProvider.Single
                 this.id,
                 InstrumentId,
                 pDepthMarketData.LastPrice,
-                (int) volume) {DepthMarketData = pDepthMarketData};
+                (int)volume)
+            { DepthMarketData = pDepthMarketData };
 
             // 启用底层数据上传
 
             EmitData(trade);
+        }
+
+        private void FireLevel2Snapshot(int InstrumentId, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
+        {
+            //行情过来时是今天累计成交量，得转换成每个tick中成交量之差
+            double volume = pDepthMarketData.Volume - DepthMarket.Volume;
+            // 以前第一条会导致集合竞价后的第一条没有成交量，这种方法就明确了上一笔是空数据
+            if (0 == DepthMarket.TradingDay && 0 == DepthMarket.ActionDay)
+            {
+                //没有接收到最开始的一条，所以这计算每个Bar的数据时肯定超大，强行设置为0
+                volume = 0;
+            }
+            else if (volume < 0)
+            {
+                //如果隔夜运行，会出现今早成交量0-昨收盘成交量，出现负数，所以当发现为负时要修改
+                volume = pDepthMarketData.Volume;
+            }
+
+            List<Bid> bids = new List<Bid>();
+            if (pDepthMarketData.Bids != null)
+            {
+                foreach (var d in pDepthMarketData.Bids)
+                {
+                    Bid bid = new Bid(
+                        _dateTime,
+                        _exchangeDateTime,
+                        this.id,
+                        InstrumentId,
+                        d.Price,
+                        d.Size);
+                    bids.Add(bid);
+                }
+            }
+
+            List<Ask> asks = new List<Ask>();
+            if (pDepthMarketData.Asks != null)
+            {
+                foreach (var d in pDepthMarketData.Asks)
+                {
+                    Ask ask = new Ask(
+                        _dateTime,
+                        _exchangeDateTime,
+                        this.id,
+                        InstrumentId,
+                        d.Price,
+                        d.Size);
+                    asks.Add(ask);
+                }
+            }
+
+            var l2s = new Level2Snapshot(_dateTime, _exchangeDateTime, this.id, InstrumentId, bids.ToArray(), asks.ToArray())
+            {
+
+            };
+
+            // 启用底层数据上传
+
+            EmitData(l2s);
         }
 
         private void FireBid(int InstrumentId, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
