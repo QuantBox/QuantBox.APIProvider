@@ -67,17 +67,21 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRspQryTradingAccount_callback(object sender, ref AccountField account, int size1, bool bIsLast)
         {
+            if (size1 <= 0)
+            {
+                (sender as XApi).GetLog().Info("OnRspQryTradingAccount");
+            }
+            else
+            {
+                (sender as XApi).GetLog().Info("OnRspQryTradingAccount:" + account.ToFormattedString());
+            }
+
             // 由策略来收回报
             if (OnRspQryTradingAccount != null)
                 OnRspQryTradingAccount(sender, ref account, size1, bIsLast);
 
             if (size1 <= 0)
-            {
-                (sender as XApi).GetLog().Info("OnRspQryTradingAccount");
                 return;
-            }
-
-            (sender as XApi).GetLog().Info("OnRspQryTradingAccount:" + account.ToFormattedString());
 
             if (!IsConnected)
                 return;
@@ -121,17 +125,21 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRspQryInvestorPosition_callback(object sender, ref PositionField position, int size1, bool bIsLast)
         {
+            if (size1 <= 0)
+            {
+                (sender as XApi).GetLog().Info("OnRspQryInvestorPosition");
+            }
+            else
+            {
+                (sender as XApi).GetLog().Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
+            }
+
             // 由策略来收回报
             if (OnRspQryInvestorPosition != null)
                 OnRspQryInvestorPosition(sender, ref position, size1, bIsLast);
 
             if (size1 <= 0)
-            {
-                (sender as XApi).GetLog().Info("OnRspQryInvestorPosition");
                 return;
-            }
-
-            (sender as XApi).GetLog().Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
 
             if (!IsConnected)
                 return;
