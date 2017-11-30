@@ -18,46 +18,6 @@ namespace QuantBox.APIProvider.Single
     public partial class SingleProvider
     {
         #region 价格修正
-        //public double FixPrice(double price, SmartQuant.OrderSide Side, double tickSize, double LowerLimitPrice, double UpperLimitPrice)
-        //{
-        //    //没有设置就直接用
-        //    if (tickSize > 0)
-        //    {
-        //        decimal remainder = ((decimal)price % (decimal)tickSize);
-        //        if (remainder != 0)
-        //        {
-        //            if (Side == SmartQuant.OrderSide.Buy)
-        //            {
-        //                price = Math.Round(Math.Ceiling(price / tickSize) * tickSize, 6);
-        //            }
-        //            else
-        //            {
-        //                price = Math.Round(Math.Floor(price / tickSize) * tickSize, 6);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            //正好能整除，不操作
-        //        }
-        //    }
-
-        //    if (0 == UpperLimitPrice
-        //        && 0 == LowerLimitPrice)
-        //    {
-        //        //涨跌停无效
-
-        //    }
-        //    else
-        //    {
-        //        //防止价格超过涨跌停
-        //        if (price >= UpperLimitPrice)
-        //            price = UpperLimitPrice;
-        //        else if (price <= LowerLimitPrice)
-        //            price = LowerLimitPrice;
-        //    }
-        //    return price;
-        //}
-
         public double FixPrice(MarketDataRecord record, double price, SmartQuant.OrderSide Side, double tickSize)
         {
             double LowerLimitPrice = record.DepthMarket.LowerLimitPrice;
@@ -224,7 +184,6 @@ namespace QuantBox.APIProvider.Single
                 }
                 if (HasPriceLimit)
                 {
-                    //price = FixPrice(price, command.Side, apiTickSize, record.DepthMarket.LowerLimitPrice, record.DepthMarket.UpperLimitPrice);
                     price = FixPrice(record, price, command.Side, apiTickSize);
                 }
 
@@ -286,6 +245,11 @@ namespace QuantBox.APIProvider.Single
         {
             var log = (sender as XApi).GetLog();
             log.Debug("OnRtnOrder:" + order.ToFormattedString());
+
+            // 由策略来收回报
+            if (OnRtnOrder != null)
+                OnRtnOrder(sender, ref order);
+
             try
             {
                 orderMap.Process(ref order, log);
@@ -300,6 +264,11 @@ namespace QuantBox.APIProvider.Single
         {
             var log = (sender as XApi).GetLog();
             log.Debug("OnRtnTrade:" + trade.ToFormattedString());
+
+            // 由策略来收回报
+            if (OnRtnTrade != null)
+                OnRtnTrade(sender, ref trade);
+
             try
             {
                 orderMap.Process(ref trade, log);

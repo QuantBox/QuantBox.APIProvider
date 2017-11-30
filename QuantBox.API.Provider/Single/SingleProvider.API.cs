@@ -16,12 +16,18 @@ namespace QuantBox.APIProvider.Single
 {
     public partial class SingleProvider
     {
-        static SingleProvider() {
+        static SingleProvider()
+        {
             NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(Path.Combine(PathHelper.RootPath.LocalPath, "NLog.config"), true);
         }
         public DelegateOnRspQryInvestorPosition OnRspQryInvestorPosition { get; set; }
         public DelegateOnRspQryTradingAccount OnRspQryTradingAccount { get; set; }
         public DelegateOnRtnInstrumentStatus OnRtnInstrumentStatus { get; set; }
+        public DelegateOnRtnOrder OnRtnOrder { get; set; }
+        public DelegateOnRtnTrade OnRtnTrade { get; set; }
+
+        public DelegateOnRspQryOrder OnRspQryOrder { get; set; }
+        public DelegateOnRspQryTrade OnRspQryTrade { get; set; }
 
         //记录合约列表,从实盘合约名到对象的映射
         private readonly Dictionary<string, InstrumentField> _dictInstruments = new Dictionary<string, InstrumentField>();
@@ -58,8 +64,8 @@ namespace QuantBox.APIProvider.Single
             }
 
             _dictInstruments[instrument.Symbol] = instrument;
-            
-            if(bIsLast)
+
+            if (bIsLast)
             {
                 (sender as XApi).GetLog().Info("合约列表已经接收完成,共 {0} 条", _dictInstruments.Count);
             }
@@ -156,7 +162,7 @@ namespace QuantBox.APIProvider.Single
                 position.AccountID, this.id, this.id);
 
             ad.Fields.Add(AccountDataField.SYMBOL, item.Symbol);
-            ad.Fields.Add(AccountDataField.EXCHANGE,item.Exchange);
+            ad.Fields.Add(AccountDataField.EXCHANGE, item.Exchange);
             ad.Fields.Add(AccountDataField.QTY, item.Qty);
             ad.Fields.Add(AccountDataField.LONG_QTY, item.LongQty);
             ad.Fields.Add(AccountDataField.SHORT_QTY, item.ShortQty);
@@ -205,10 +211,14 @@ namespace QuantBox.APIProvider.Single
             if (size1 <= 0)
             {
                 (sender as XApi).GetLog().Info("OnRspQryTrade");
-                return;
-            }
 
-            (sender as XApi).GetLog().Info("OnRspQryTrade:" + trade.ToFormattedString());
+            }
+            else
+            {
+                (sender as XApi).GetLog().Info("OnRspQryTrade:" + trade.ToFormattedString());
+            }
+            if (OnRspQryTrade != null)
+                OnRspQryTrade(this, ref trade, size1, bIsLast);
         }
 
         private void OnRspQryOrder_callback(object sender, ref OrderField order, int size1, bool bIsLast)
@@ -216,10 +226,13 @@ namespace QuantBox.APIProvider.Single
             if (size1 <= 0)
             {
                 (sender as XApi).GetLog().Info("OnRspQryOrder");
-                return;
             }
-
-            (sender as XApi).GetLog().Info("OnRspQryOrder:" + order.ToFormattedString());
+            else
+            {
+                (sender as XApi).GetLog().Info("OnRspQryOrder:" + order.ToFormattedString());
+            }
+            if (OnRspQryOrder != null)
+                OnRspQryOrder(this, ref order, size1, bIsLast);
         }
 
         private void OnRtnInstrumentStatus_callback(object sender, ref InstrumentStatusField instrumentStatus)
@@ -236,7 +249,7 @@ namespace QuantBox.APIProvider.Single
         public InstrumentStatusField GetInstrumentStatus(string symbol)
         {
             InstrumentStatusField instrumentStatus;
-            if(_dictInstrumentsStatus.TryGetValue(symbol,out instrumentStatus))
+            if (_dictInstrumentsStatus.TryGetValue(symbol, out instrumentStatus))
             {
                 return instrumentStatus;
             }
