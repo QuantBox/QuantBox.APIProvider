@@ -89,7 +89,7 @@ namespace QuantBox.APIProvider.Single
 
         public ServerInfoField ToStruct()
         {
-            ServerInfoField field;
+            ServerInfoField field = new ServerInfoField();
             field.IsUsingUdp = this.IsUsingUdp;
             field.IsMulticast = this.IsMulticast;
             field.TopicId = this.TopicId;

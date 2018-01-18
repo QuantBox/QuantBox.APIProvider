@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using XAPI.Callback;
 using XAPI;
 using NLog;
 using QuantBox.Extensions;
@@ -35,13 +34,13 @@ namespace QuantBox.APIProvider.Single
     public partial class SingleProvider
     {
         // 实际的连接，由这个来
-        internal XApi _TdApi;
-        internal XApi _MdApi;
-        internal XApi _L2Api;
-        internal XApi _QuoteRequestApi;
-        internal XApi _HdApi;
-        internal XApi _ItApi;
-        internal XApi _QueryApi;
+        internal IXApi _TdApi;
+        internal IXApi _MdApi;
+        internal IXApi _L2Api;
+        internal IXApi _QuoteRequestApi;
+        internal IXApi _HdApi;
+        internal IXApi _ItApi;
+        internal IXApi _QueryApi;
 
         private void _Connect(bool bFromUI)
         {
@@ -80,7 +79,7 @@ namespace QuantBox.APIProvider.Single
                 {
                     if (item.UseType > 0)
                     {
-                        XApi api = ConnectToApi(item);
+                        IXApi api = ConnectToApi(item);
                         assign(item, api);
                     }
                     else
@@ -232,16 +231,16 @@ namespace QuantBox.APIProvider.Single
                 {
                     if (userLogin.RawErrorID != 0)
                     {
-                        (sender as XApi).GetLog().Info("{0}:{1}", status, userLogin.ToFormattedStringShort());
+                        (sender as IXApi).GetLog().Info("{0}:{1}", status, userLogin.ToFormattedStringShort());
                     }
                     else
                     {
-                        (sender as XApi).GetLog().Info("{0}:{1}", status, userLogin.ToFormattedStringLong());
+                        (sender as IXApi).GetLog().Info("{0}:{1}", status, userLogin.ToFormattedStringLong());
                     }
                 }
                 else
                 {
-                    (sender as XApi).GetLog().Info("{0}", status);
+                    (sender as IXApi).GetLog().Info("{0}", status);
                 }
 
                 switch (status)
@@ -309,7 +308,7 @@ namespace QuantBox.APIProvider.Single
 
 
         #region XApi小功能
-        private void assign(ApiItem item, XApi api)
+        private void assign(ApiItem item, IXApi api)
         {
             if ((item.UseType & ApiType.MarketData) == ApiType.MarketData)
             {
@@ -341,7 +340,7 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        public XApi GetXApi(ApiType type)
+        public IXApi GetXApi(ApiType type)
         {
             switch (type)
             {
@@ -362,32 +361,22 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        private XApi ConnectToApi(ApiItem item)
+        private IXApi ConnectToApi(ApiItem item)
         {
             //lock (this)
             {
                 DisconnectToApi(item);
 
-                XApi api = item.Api;
+                IXApi api = item.Api;
 
                 if (api == null)
                 {
-                    api = new XApi(PathHelper.MakeAbsolutePath(item.DllPath));
+                    api = XApiHelper.CreateInstance(item.TypeName, item.DllPath);
                     item.Api = api;
                 }
 
                 api.Server = ServerList[item.Server].ToStruct();
-                if (item.UserList.Count > 0)
-                {
-                    foreach (var it in item.UserList)
-                    {
-                        api.UserList.Add(it.ToStruct());
-                    }
-                }
-                else
-                {
-                    api.User = UserList[item.User].ToStruct();
-                }
+                api.User = UserList[item.User].ToStruct();
 
                 // 更新Log名字，这样在日志中可以进行识别
                 api.Log = LogManager.GetLogger(string.Format("{0}.{1}.{2}", Name, item.LogPrefix, api.User.UserID));
@@ -445,7 +434,7 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        private void _DisconnectToApi(XApi api)
+        private void _DisconnectToApi(IXApi api)
         {
             try
             {
@@ -468,7 +457,7 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        private bool IsApiConnected(XApi api)
+        private bool IsApiConnected(IXApi api)
         {
             return (api != null && api.IsConnected);
         }
@@ -500,17 +489,17 @@ namespace QuantBox.APIProvider.Single
         #region 其它非关键功能
         private void OnRtnError_callback(object sender, ref ErrorField error)
         {
-            (sender as XApi).GetLog().Error("OnRtnError:" + error.ToFormattedString());
+            (sender as IXApi).GetLog().Error("OnRtnError:" + error.ToFormattedString());
         }
 
         private void OnLog_callback(object sender, ref LogField log)
         {
-            (sender as XApi).GetLog().Info("OnLog:" + log.ToFormattedString());
+            (sender as IXApi).GetLog().Info("OnLog:" + log.ToFormattedString());
         }
 
         private void OnRtnQuoteRequest_callback(object sender, ref QuoteRequestField quoteRequest)
         {
-            (sender as XApi).GetLog().Info("OnRtnQuoteRequest:" + quoteRequest.ToFormattedString());
+            (sender as IXApi).GetLog().Info("OnRtnQuoteRequest:" + quoteRequest.ToFormattedString());
 
             MarketDataRecord record;
             if (!marketDataRecords.TryGetValue(quoteRequest.Symbol, out record))
@@ -526,7 +515,7 @@ namespace QuantBox.APIProvider.Single
 
         private void QueryAccountPositionInstrument_Logined()
         {
-            ReqQueryField query = default(ReqQueryField);
+            ReqQueryField query = new ReqQueryField();
             query.PortfolioID1 = DefaultPortfolioID1;
             query.PortfolioID2 = DefaultPortfolioID2;
             query.PortfolioID3 = DefaultPortfolioID3;
@@ -535,14 +524,14 @@ namespace QuantBox.APIProvider.Single
             // 查持仓，查资金
             if (IsApiConnected(_QueryApi))
             {
-                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, ref query);
-                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, ref query);
+                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
+                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
             }
 
             // 查合约
             if (IsApiConnected(_ItApi))
             {
-                _ItApi.ReqQuery(QueryType.ReqQryInstrument, ref query);
+                _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
             }
         }
 
@@ -551,7 +540,7 @@ namespace QuantBox.APIProvider.Single
             if (!IsApiConnected(_QueryApi))
                 return;
 
-            ReqQueryField query = default(ReqQueryField);
+            ReqQueryField query = new ReqQueryField();
             query.PortfolioID1 = DefaultPortfolioID1;
             query.PortfolioID2 = DefaultPortfolioID2;
             query.PortfolioID3 = DefaultPortfolioID3;
@@ -560,14 +549,14 @@ namespace QuantBox.APIProvider.Single
             _QueryAccountCount -= (int)_Timer.Interval / 1000;
             if (_QueryAccountCount <= 0)
             {
-                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, ref query);
+                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
                 _QueryAccountCount = _QueryAccountInterval;
             }
 
             _QueryPositionCount -= (int)_Timer.Interval / 1000;
             if (_QueryPositionCount <= 0)
             {
-                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, ref query);
+                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
                 _QueryPositionCount = _QueryPositionInterval;
             }
         }

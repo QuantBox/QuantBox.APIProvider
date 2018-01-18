@@ -96,7 +96,7 @@ namespace QuantBox.APIProvider.Single
         public void DoOrderSend(ref OrderField[] ordersArray, List<Order> ordersList)
         {
             // 这里其实返回的是LocalID
-            string outstr = provider._TdApi.SendOrder(ref ordersArray);
+            string outstr = provider._TdApi.SendOrder(ordersArray);
             string[] OrderIds = outstr.Split(';');
 
             int i = 0;

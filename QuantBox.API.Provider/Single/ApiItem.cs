@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using QuantBox.APIProvider.UI;
-using XAPI.Callback;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,74 +20,70 @@ namespace QuantBox.APIProvider.Single
     public class ApiItem : ICloneable
     {
         public const string CATEGORY_INFO = "Information";
-        public const string CATEGORY_Type = "Type";
+        public const string CATEGORY_TYPE = "Type";
 
         internal BindingList<UserItem> LinkedUserList;
         internal BindingList<ServerItem> LinkedServerList;
 
         private string _dllPath;
+        private string _typeName;
+
+        private IXApi CheckApi(string typeName,string dllPath)
+        {
+            if(string.IsNullOrEmpty(typeName))
+            {
+                TypeName = "XAPI.Callback.XApi, XAPI_CSharp";
+                return null;
+            }
+            var api = XApiHelper.CreateInstance(typeName, dllPath);
+            try
+            {
+                Type = api.GetApiTypes;
+                Name = api.GetApiName;
+                Version = api.GetApiVersion;
+
+                // 取公共部分
+                UseType = UseType & Type;
+            }
+            catch (Exception ex)
+            {
+                api = null;
+                Type = ApiType.None;
+                Name = ex.Message;
+                Version = "请使用depends检查一下是否缺少依赖";
+                UseType = ApiType.None;
+            }
+            return api;
+        }
 
         [Editor(typeof(System.Windows.Forms.Design.FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
         public string DllPath
         {
-            get {
-                if (ProviderHost.autoMakeRelativePath)
-                {
-                    return PathHelper.MakeRelativePath(_dllPath);
-                }
-                else
-                {
-                    return PathHelper.MakeAbsolutePath(_dllPath);
-                }
+            get
+            {
+                return _dllPath;
             }
             set
             {
-                string tmp_dllPath;
-                if (ProviderHost.autoMakeRelativePath)
-                {
-                    tmp_dllPath = PathHelper.MakeRelativePath(value);
-                }
-                else
-                {
-                    tmp_dllPath = PathHelper.MakeAbsolutePath(value);
-                }
+                _dllPath = value;
+                Api = CheckApi(_typeName, _dllPath);
+            }
+        }
 
-                // 不一样
-                bool diff = _dllPath != tmp_dllPath;
-                _dllPath = tmp_dllPath;
-
-
-                // 这个地方导致Json无法还原，所以先判断是否需要进行调用
-                if (LinkedUserList != null) {
-                    if (Api == null || diff)
-                    {
-                        Api = new XApi(_dllPath);
-                    }
-                    if (Api != null) {
-                        try
-                        {
-                            Type = Api.GetApiTypes;
-                            Name = Api.GetApiName;
-                            Version = Api.GetApiVersion;
-
-                            // 取公共部分
-                            UseType = UseType & Type;
-                        }
-                        catch(Exception ex)
-                        {
-                            Api = null;
-                            Type = ApiType.Nono;
-                            Name =  ex.Message;
-                            Version = "请使用depends检查一下是否缺少依赖";
-                            UseType = ApiType.Nono;
-                        }
-                    }
-                }
+        public string TypeName
+        {
+            get
+            {
+                return _typeName;
+            }
+            set {
+                _typeName = value;
+                Api = CheckApi(_typeName, _dllPath);
             }
         }
 
         [Browsable(false)]
-        internal XApi Api { get; set; }
+        internal IXApi Api { get; set; }
 
         [Category(CATEGORY_INFO)]
         [ReadOnly(true)]
@@ -103,20 +98,20 @@ namespace QuantBox.APIProvider.Single
         [TypeConverter(typeof(ServerItemConverter))]
         public int Server { get; set; }
 
-        private BindingList<UserItem> userList = new BindingList<UserItem>();
-        public BindingList<UserItem> UserList
-        {
-            get { return userList; }
-            set { userList = value; }
-        }
+        //private BindingList<UserItem> userList = new BindingList<UserItem>();
+        //public BindingList<UserItem> UserList
+        //{
+        //    get { return userList; }
+        //    set { userList = value; }
+        //}
 
         public string LogPrefix { get; set; }
 
 
-        [Category(CATEGORY_Type)]
+        [Category(CATEGORY_TYPE)]
         [ReadOnly(true)]
         public ApiType Type { get; set; }
-        [Category(CATEGORY_Type)]
+        [Category(CATEGORY_TYPE)]
         [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
         public ApiType UseType { get; set; }
 

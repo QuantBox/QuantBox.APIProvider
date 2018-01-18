@@ -37,7 +37,7 @@ namespace QuantBox.APIProvider.Single
 
         public UserInfoField ToStruct()
         {
-            UserInfoField field;
+            UserInfoField field = new UserInfoField();
 
             field.UserID = this.UserID;
             field.Password = this.Password;

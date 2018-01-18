@@ -220,6 +220,8 @@ namespace QuantBox.APIProvider.Single
 
         private void ToOrderStruct(ref OrderField field, Order order, string apiSymbol, string apiExchange)
         {
+            field = new OrderField();
+
             field.InstrumentID = apiSymbol;
             field.ExchangeID = apiExchange;
             field.Price = order.Price;

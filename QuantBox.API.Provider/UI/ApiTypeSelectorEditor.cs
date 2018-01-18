@@ -42,7 +42,7 @@ namespace QuantBox.APIProvider.UI
                 selector.Clear();
                 foreach (ApiType category in Enum.GetValues(typeof(ApiType)))
                 {
-                    if (category != ApiType.Nono)
+                    if (category != ApiType.None)
                     {
                         if((instance.Type & category) == category)
                         {
