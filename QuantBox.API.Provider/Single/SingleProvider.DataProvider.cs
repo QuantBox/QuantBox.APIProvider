@@ -16,7 +16,7 @@ namespace QuantBox.APIProvider.Single
             {
                 Bid bid = new Bid(DateTime.Now, this.id, instrument.Id, 100, 5);
                 EmitData(bid);
-            
+
                 Ask ask = new Ask(DateTime.Now, this.id, instrument.Id, 101, 5);
                 EmitData(ask);
             }
@@ -51,10 +51,16 @@ namespace QuantBox.APIProvider.Single
             string Symbol = apiSymbol;
 
             MarketDataRecord record;
+
             if (!marketDataRecords.TryGetValue(Symbol_Dot_Exchange, out record))
             {
-                record = new MarketDataRecord(instrument);
-                record.Symbol = Symbol;
+                record = new MarketDataRecord();
+
+                record.TradeRequested = true;
+                record.QuoteRequested = true;
+                record.MarketDepthRequested = true;
+
+                record.Symbol = apiSymbol;
                 record.Exchange = apiExchange;
                 record.Symbol_Dot = Symbol_Dot;
                 record.Symbol_Dot_Exchange = Symbol_Dot_Exchange;
@@ -63,13 +69,15 @@ namespace QuantBox.APIProvider.Single
                 marketDataRecords[Symbol_Dot_Exchange] = record;
                 marketDataRecords[Symbol_Dot] = record;
                 marketDataRecords[Symbol] = record;
+
+                record.Instrument = instrument.Symbol;
+                record.Ids.Add(instrument.Id);
+                Subscribe(record);
             }
-
-            record.TradeRequested = true;
-            record.QuoteRequested = true;
-            record.MarketDepthRequested = true;
-
-            Subscribe(record);
+            else
+            {
+                record.Ids.Add(instrument.Id);
+            }
         }
 
         public override void Unsubscribe(Instrument instrument)
@@ -93,25 +101,30 @@ namespace QuantBox.APIProvider.Single
             MarketDataRecord record;
             if (marketDataRecords.TryGetValue(Symbol_Dot_Exchange, out record))
             {
-                Unsubscribe(record);
+                record.Ids.Remove(instrument.Id);
 
-                // 多次订阅也无所谓
-                record.TradeRequested = false;
-                record.QuoteRequested = false;
-                record.MarketDepthRequested = false;
+                if (record.Ids.Count == 0)
+                {
+                    Unsubscribe(record);
+
+                    // 多次订阅也无所谓
+                    record.TradeRequested = false;
+                    record.QuoteRequested = false;
+                    record.MarketDepthRequested = false;
+
+                    // 移除
+                    marketDataRecords.Remove(Symbol_Dot_Exchange);
+                    marketDataRecords.Remove(Symbol_Dot);
+                    marketDataRecords.Remove(Symbol);
+                }
             }
-
-            // 移除
-            marketDataRecords.Remove(Symbol_Dot_Exchange);
-            marketDataRecords.Remove(Symbol_Dot);
-            marketDataRecords.Remove(Symbol);
         }
 
         private void Subscribe(MarketDataRecord record)
         {
             if (IsApiConnected(_MdApi))
             {
-                _MdApi.GetLog().Info("订阅合约 {0} {1} {2}", record.Instrument.Symbol, record.Symbol, record.Exchange);
+                _MdApi.GetLog().Info("订阅合约 {0} {1} {2}", record.Instrument, record.Symbol, record.Exchange);
                 _MdApi.Subscribe(record.Symbol, record.Exchange);
             }
             else
@@ -130,7 +143,7 @@ namespace QuantBox.APIProvider.Single
         {
             if (_MdApi != null)
             {
-                _MdApi.GetLog().Info("退订合约 {0} {1} {2}", record.Instrument.Symbol, record.Symbol, record.Exchange);
+                _MdApi.GetLog().Info("退订合约 {0} {1} {2}", record.Instrument, record.Symbol, record.Exchange);
 
                 _MdApi.Unsubscribe(record.Symbol, record.Exchange);
             }

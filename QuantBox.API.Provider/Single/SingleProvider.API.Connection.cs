@@ -12,24 +12,24 @@ using QuantBox.Extensions;
 
 namespace QuantBox.APIProvider.Single
 {
-/*
-    插件状态分解
+    /*
+        插件状态分解
 
-    人为：
-    用户主动连接，1.连接成功，2连接失败，3，连接成功登录失败，4.登录成功，但初始化失败
-    用户主动断开，
-    定时：
-    定时连接
-    定时断开
-    其它：
-    网络连上
-    网络断开
+        人为：
+        用户主动连接，1.连接成功，2连接失败，3，连接成功登录失败，4.登录成功，但初始化失败
+        用户主动断开，
+        定时：
+        定时连接
+        定时断开
+        其它：
+        网络连上
+        网络断开
 
 
-        */
-/*
- * OQ里正在断开连接不能轻易用，因为会导致右键时不能连接也不能断开
-*/
+            */
+    /*
+     * OQ里正在断开连接不能轻易用，因为会导致右键时不能连接也不能断开
+    */
 
     public partial class SingleProvider
     {
@@ -136,7 +136,7 @@ namespace QuantBox.APIProvider.Single
         private int nDisconnectCount = 0;
         void _Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            lock(this)
+            lock (this)
             {
                 _Timer.Enabled = false;
 
@@ -202,7 +202,7 @@ namespace QuantBox.APIProvider.Single
                         // 关闭查询间隔
                         SetApiReconnectInterval(0);
                         // 由于定时器设置的是20秒，所以这里正好是5分钟显示一次
-                        if (nDisconnectCount % (3*5) == 0)
+                        if (nDisconnectCount % (3 * 5) == 0)
                         {
                             xlog.Info("当前[{0}]在非交易时段，主动断开连接，下次要连接的时段为[{1}]", e.SignalTime.TimeOfDay, st_next);
 
@@ -265,7 +265,7 @@ namespace QuantBox.APIProvider.Single
             {
                 if (item.UseType > 0)
                 {
-                    if(!IsApiConnected(item.Api))
+                    if (!IsApiConnected(item.Api))
                     {
                         bCheckOk = false;
                         break;
@@ -274,7 +274,7 @@ namespace QuantBox.APIProvider.Single
             }
 
             // 每个连接都检查是否连上，如果连上，开始进行一些基本的查询
-            if(bCheckOk)
+            if (bCheckOk)
             {
                 base.Status = ProviderStatus.Connected;
 
@@ -290,7 +290,7 @@ namespace QuantBox.APIProvider.Single
              3.主动断开连接
              4.被动断开，需要重连
              */
-            switch(base.Status)
+            switch (base.Status)
             {
                 case ProviderStatus.Connected:
                     // 以前连接成功了，现在需要试着重连
@@ -420,11 +420,11 @@ namespace QuantBox.APIProvider.Single
 
         private void DisconnectToApi(ApiItem item)
         {
-            if(item.Api != null)
+            if (item.Api != null)
             {
                 // 直接销毁
                 _DisconnectToApi(item.Api);
-                
+
                 //// 在线程中销毁
                 //Task task = Task.Factory.StartNew(
                 //    ()=> { _DisconnectToApi(item.Api); }
@@ -507,10 +507,14 @@ namespace QuantBox.APIProvider.Single
                 return;
             }
 
-            NewsEx news = new NewsEx(DateTime.Now, this.id, record.Instrument.Id, NewsUrgency.Flash, "", "", quoteRequest.ToFormattedString());
-            news.ResponseType = XAPI.ResponseType.OnRtnQuoteRequest;
-            news.UserData = quoteRequest;
-            EmitData(news);
+            foreach (var _id in record.Ids)
+            {
+                NewsEx news = new NewsEx(DateTime.Now, this.id, _id, NewsUrgency.Flash, "", "", quoteRequest.ToFormattedString());
+
+                news.ResponseType = XAPI.ResponseType.OnRtnQuoteRequest;
+                news.UserData = quoteRequest;
+                EmitData(news);
+            }
         }
 
         private void QueryAccountPositionInstrument_Logined()

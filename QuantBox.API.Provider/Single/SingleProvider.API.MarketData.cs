@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 using XAPI.Callback;
 using XAPI;
-//using System.Threading.Tasks.Dataflow;
 using QuantBox.Extensions;
 
 namespace QuantBox.APIProvider.Single
@@ -54,24 +53,24 @@ namespace QuantBox.APIProvider.Single
                 {
                     if (_emitBidAsk)
                     {
-                        FireBid(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
-                        FireAsk(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                        FireBid(record.Ids, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                        FireAsk(record.Ids, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
                     }
-                    FireTrade(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                    FireTrade(record.Ids, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
                 }
                 else
                 {
-                    FireTrade(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                    FireTrade(record.Ids, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
                     if (_emitBidAsk)
                     {
-                        FireBid(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
-                        FireAsk(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                        FireBid(record.Ids, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                        FireAsk(record.Ids, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
                     }
                 }
 
                 if (_emitLevel2Snapshot)
                 {
-                    FireLevel2Snapshot(record.Instrument.Id, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
+                    FireLevel2Snapshot(record.Ids, _dateTime, _exchangeDateTime, pDepthMarketData, depthMarket);
                 }
             }
             catch (Exception ex)
@@ -80,7 +79,7 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        private void FireTrade(int InstrumentId, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
+        private void FireTrade(SortedSet<int> Ids, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
         {
             //行情过来时是今天累计成交量，得转换成每个tick中成交量之差
             double volume = pDepthMarketData.Volume - DepthMarket.Volume;
@@ -96,22 +95,26 @@ namespace QuantBox.APIProvider.Single
                 volume = pDepthMarketData.Volume;
             }
 
-            // 使用新的类,保存更多信息
-            var trade = new TradeEx(
-                _dateTime,
-                _exchangeDateTime,
-                this.id,
-                InstrumentId,
-                pDepthMarketData.LastPrice,
-                (int)volume)
-            { DepthMarketData = pDepthMarketData };
+            foreach (var _id in Ids)
+            {
+                // 使用新的类,保存更多信息
+                var trade = new TradeEx(
+                    _dateTime,
+                    _exchangeDateTime,
+                    id,
+                    _id,
+                    pDepthMarketData.LastPrice,
+                    (int)volume)
+                {
+                    DepthMarketData = pDepthMarketData
+                };
 
-            // 启用底层数据上传
-
-            EmitData(trade);
+                // 启用底层数据上传
+                EmitData(trade);
+            }
         }
 
-        private void FireLevel2Snapshot(int InstrumentId, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
+        private void FireLevel2Snapshot(SortedSet<int> Ids, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
         {
             //行情过来时是今天累计成交量，得转换成每个tick中成交量之差
             double volume = pDepthMarketData.Volume - DepthMarket.Volume;
@@ -127,49 +130,51 @@ namespace QuantBox.APIProvider.Single
                 volume = pDepthMarketData.Volume;
             }
 
-            List<Bid> bids = new List<Bid>();
-            if (pDepthMarketData.Bids != null)
+            foreach (var _id in Ids)
             {
-                foreach (var d in pDepthMarketData.Bids)
+                List<Bid> bids = new List<Bid>();
+                if (pDepthMarketData.Bids != null)
                 {
-                    Bid bid = new Bid(
-                        _dateTime,
-                        _exchangeDateTime,
-                        this.id,
-                        InstrumentId,
-                        d.Price,
-                        d.Size);
-                    bids.Add(bid);
+                    foreach (var d in pDepthMarketData.Bids)
+                    {
+                        Bid bid = new Bid(
+                            _dateTime,
+                            _exchangeDateTime,
+                            id,
+                            _id,
+                            d.Price,
+                            d.Size);
+                        bids.Add(bid);
+                    }
                 }
-            }
 
-            List<Ask> asks = new List<Ask>();
-            if (pDepthMarketData.Asks != null)
-            {
-                foreach (var d in pDepthMarketData.Asks)
+                List<Ask> asks = new List<Ask>();
+                if (pDepthMarketData.Asks != null)
                 {
-                    Ask ask = new Ask(
-                        _dateTime,
-                        _exchangeDateTime,
-                        this.id,
-                        InstrumentId,
-                        d.Price,
-                        d.Size);
-                    asks.Add(ask);
+                    foreach (var d in pDepthMarketData.Asks)
+                    {
+                        Ask ask = new Ask(
+                            _dateTime,
+                            _exchangeDateTime,
+                            id,
+                            _id,
+                            d.Price,
+                            d.Size);
+                        asks.Add(ask);
+                    }
                 }
+
+                var l2s = new Level2Snapshot(_dateTime, _exchangeDateTime, id, _id, bids.ToArray(), asks.ToArray())
+                {
+
+                };
+
+                // 启用底层数据上传
+                EmitData(l2s);
             }
-
-            var l2s = new Level2Snapshot(_dateTime, _exchangeDateTime, this.id, InstrumentId, bids.ToArray(), asks.ToArray())
-            {
-
-            };
-
-            // 启用底层数据上传
-
-            EmitData(l2s);
         }
 
-        private void FireBid(int InstrumentId, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
+        private void FireBid(SortedSet<int> Ids, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
         {
             do
             {
@@ -186,20 +191,22 @@ namespace QuantBox.APIProvider.Single
                     }
                 }
 
-                Bid bid = new Bid(
+                foreach (var _id in Ids)
+                {
+                    Bid bid = new Bid(
                         _dateTime,
                         _exchangeDateTime,
-                        this.id,
-                        InstrumentId,
+                        id,
+                        _id,
                         pDepthMarketData.Bids[0].Price,
                         pDepthMarketData.Bids[0].Size);
 
-                EmitData(bid);
-
+                    EmitData(bid);
+                }
             } while (false);
         }
 
-        private void FireAsk(int InstrumentId, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
+        private void FireAsk(SortedSet<int> Ids, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
         {
             do
             {
@@ -217,16 +224,18 @@ namespace QuantBox.APIProvider.Single
 
                 }
 
-                Ask ask = new Ask(
+                foreach (var _id in Ids)
+                {
+                    Ask ask = new Ask(
                         _dateTime,
                         _exchangeDateTime,
-                        this.id,
-                        InstrumentId,
+                        id,
+                        _id,
                         pDepthMarketData.Asks[0].Price,
                         pDepthMarketData.Asks[0].Size);
 
-                EmitData(ask);
-
+                    EmitData(ask);
+                }
             } while (false);
         }
     }

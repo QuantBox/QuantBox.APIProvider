@@ -16,7 +16,7 @@ namespace QuantBox.APIProvider.Single
         public string Symbol_Dot;
         public string Symbol_Dot_Exchange;
 
-        public Instrument Instrument;
+        public string Instrument;
 
         public bool TradeRequested;
         public bool QuoteRequested;
@@ -24,10 +24,12 @@ namespace QuantBox.APIProvider.Single
         // 记录上次行情
         public DepthMarketDataNClass DepthMarket;
 
-        public MarketDataRecord(Instrument instrument)
+        public SortedSet<int> Ids;
+
+        public MarketDataRecord()
         {
-            this.Instrument = instrument;
-            this.DepthMarket = new DepthMarketDataNClass();
+            DepthMarket = new DepthMarketDataNClass();
+            Ids = new SortedSet<int>();
         }
     }
 }
