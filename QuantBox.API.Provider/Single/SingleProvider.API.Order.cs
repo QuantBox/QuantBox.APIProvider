@@ -144,7 +144,7 @@ namespace QuantBox.APIProvider.Single
             string apiExchange;
             double apiTickSize;
 
-            GetApi_Symbol_Exchange_TickSize(command.Instrument,
+            GetApi_Symbol_Exchange_TickSize(command.Instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
                 out apiTickSize);
@@ -207,7 +207,7 @@ namespace QuantBox.APIProvider.Single
                 string apiExchange;
                 double apiTickSize;
 
-                GetApi_Symbol_Exchange_TickSize(orders[i].Instrument,
+                GetApi_Symbol_Exchange_TickSize(orders[i].Instrument, this.id,
                     out altSymbol, out altExchange,
                     out apiSymbol, out apiExchange,
                     out apiTickSize);

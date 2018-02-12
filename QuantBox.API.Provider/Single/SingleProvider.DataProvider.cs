@@ -41,11 +41,12 @@ namespace QuantBox.APIProvider.Single
             string apiExchange;
             double apiTickSize;
 
-            GetApi_Symbol_Exchange_TickSize(instrument,
+            GetApi_Symbol_Exchange_TickSize(instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
                 out apiTickSize);
 
+            // 如果是对CTP接口，使用UFX的参数进行订阅是否有问题？IF1802.7,目前猜没有问题
             string Symbol_Dot_Exchange = string.Format("{0}.{1}", apiSymbol, apiExchange);
             string Symbol_Dot = string.Format("{0}.", apiSymbol);
             string Symbol = apiSymbol;
@@ -88,7 +89,7 @@ namespace QuantBox.APIProvider.Single
             string apiExchange;
             double apiTickSize;
 
-            GetApi_Symbol_Exchange_TickSize(instrument,
+            GetApi_Symbol_Exchange_TickSize(instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
                 out apiTickSize);
@@ -124,7 +125,7 @@ namespace QuantBox.APIProvider.Single
         {
             if (IsApiConnected(_MdApi))
             {
-                _MdApi.GetLog().Info("订阅合约 {0} {1} {2}", record.Instrument, record.Symbol, record.Exchange);
+                _MdApi.GetLog().Info("订阅合约:Symbol:{0};InstrumentID:{1};ExchangeID:{2}", record.Instrument, record.Symbol, record.Exchange);
                 _MdApi.Subscribe(record.Symbol, record.Exchange);
             }
             else
@@ -143,7 +144,7 @@ namespace QuantBox.APIProvider.Single
         {
             if (_MdApi != null)
             {
-                _MdApi.GetLog().Info("退订合约 {0} {1} {2}", record.Instrument, record.Symbol, record.Exchange);
+                _MdApi.GetLog().Info("退订合约:Symbol:{0};InstrumentID:{1};ExchangeID:{2}", record.Instrument, record.Symbol, record.Exchange);
 
                 _MdApi.Unsubscribe(record.Symbol, record.Exchange);
             }

@@ -48,7 +48,7 @@ namespace QuantBox.APIProvider.Single
             string apiExchange;
             double apiTickSize;
 
-            GetApi_Symbol_Exchange_TickSize(command.Instrument,
+            GetApi_Symbol_Exchange_TickSize(command.Instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
                 out apiTickSize);
@@ -69,10 +69,12 @@ namespace QuantBox.APIProvider.Single
         private void OnRtnQuote_callback(object sender, ref QuoteField quote)
         {
             (sender as XApi).GetLog().Debug("OnRtnQuote:" + quote.ToFormattedString());
-            try {
+            try
+            {
                 quoteMap.Process(ref quote);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 (sender as XApi).GetLog().Error(ex);
             }
         }

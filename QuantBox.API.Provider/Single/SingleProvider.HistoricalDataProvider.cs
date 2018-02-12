@@ -20,7 +20,7 @@ namespace QuantBox.APIProvider.Single
             string apiExchange;
             double apiTickSize;
 
-            GetApi_Symbol_Exchange_TickSize(request.Instrument,
+            GetApi_Symbol_Exchange_TickSize(request.Instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
                 out apiTickSize);
@@ -34,9 +34,9 @@ namespace QuantBox.APIProvider.Single
             field.Time1 = GetTime(request.DateTime1);
             field.Time2 = GetTime(request.DateTime2);
             field.DataType = (XAPI.DataObjetType)request.DataType;
-            if(request.BarType.HasValue)
+            if (request.BarType.HasValue)
                 field.BarType = (XAPI.BarType)request.BarType.Value;
-            if(request.BarSize.HasValue)
+            if (request.BarSize.HasValue)
                 field.BarSize = (int)request.BarSize.Value;
             //field.RequestId;
             //field.Count;
@@ -52,7 +52,7 @@ namespace QuantBox.APIProvider.Single
         }
         public override void Send(HistoricalDataRequest request)
         {
-            if(!IsApiConnected(_HdApi))
+            if (!IsApiConnected(_HdApi))
             {
                 EmitHistoricalDataEnd(request.RequestId, RequestResult.Error, "Provider is not connected.");
                 xlog.Error("历史行情服务器没有连接");
@@ -60,7 +60,7 @@ namespace QuantBox.APIProvider.Single
             }
 
             int iRet = 1;
-            switch(request.DataType)
+            switch (request.DataType)
             {
                 case DataObjectType.Bid:
                 case DataObjectType.Ask:
