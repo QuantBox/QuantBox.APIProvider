@@ -243,7 +243,7 @@ namespace QuantBox.APIProvider.Single
             // 记录下来，后期可能要用到
             _dictInstrumentsStatus[instrumentStatus.Symbol] = instrumentStatus;
 
-            (sender as XApi).GetLog().Info("OnRtnInstrumentStatus:" + instrumentStatus.ToFormattedString());
+            //(sender as XApi).GetLog().Info("OnRtnInstrumentStatus:" + instrumentStatus.ToFormattedString());
         }
 
         public InstrumentStatusField GetInstrumentStatus(string symbol)
