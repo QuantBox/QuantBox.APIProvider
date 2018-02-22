@@ -105,7 +105,7 @@ namespace QuantBox.APIProvider.Single
                 if (string.IsNullOrEmpty(orderId))
                 {
                     // 直接将单子拒绝
-                    EmitExecutionReport(new OrderRecord(ordersList[i]), SQ.ExecType.ExecRejected, SQ.OrderStatus.Rejected, "ErrorCode:" + orderId);
+                    EmitExecutionReport(new OrderRecord(ordersList[i]), SQ.ExecType.ExecRejected, SQ.OrderStatus.Rejected, "Provider ErrorCode:" + orderId);
                 }
                 else
                 {
@@ -136,6 +136,12 @@ namespace QuantBox.APIProvider.Single
                 {
                     if (this.workingOrders.TryGetValue(OrderIds[i], out recordList[i]))
                     {
+                        // 订单已经下到柜台上了
+                        pendingCancels[OrderIds[i]] = recordList[i];
+                    }
+                    else if (this.pendingOrders.TryGetValue(OrderIds[i], out recordList[i]))
+                    {
+                        // 订单还没有下到柜台，需要撤单
                         pendingCancels[OrderIds[i]] = recordList[i];
                     }
                 }
@@ -157,7 +163,7 @@ namespace QuantBox.APIProvider.Single
                     {
                         if(recordList[i] != null)
                         {
-                            EmitExecutionReport(recordList[i], SQ.ExecType.ExecCancelReject, recordList[i].Order.Status, "ErrorCode:" + e);
+                            EmitExecutionReport(recordList[i], SQ.ExecType.ExecCancelReject, recordList[i].Order.Status, "Provider ErrorCode:" + e);
                         }
                     }
                     ++i;
@@ -223,6 +229,10 @@ namespace QuantBox.APIProvider.Single
                     break;
                 case XAPI.ExecType.CancelReject:
                     if (this.pendingCancels.TryRemove(order.ID, out record))
+                    {
+                        EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
+                    }
+                    else if (this.pendingCancels.TryRemove(order.LocalID, out record))
                     {
                         EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
                     }
