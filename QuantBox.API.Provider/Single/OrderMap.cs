@@ -187,7 +187,7 @@ namespace QuantBox.APIProvider.Single
                         this.workingOrders.Add(order.ID, record);
                         // 将LocalID更新为ID
                         this.orderIDs[record.Order.Id] = order.ID;
-                        EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status);
+                        EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
                     }
                     else
                     {
