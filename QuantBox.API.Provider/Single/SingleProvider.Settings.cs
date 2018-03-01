@@ -22,7 +22,8 @@ namespace QuantBox.APIProvider.Single
         private const string CATEGORY_QUOTE_REQUEST = "Settings - QuoteRequest";
         private const string CATEGORY_INSTRUMENT = "Settings - Instrument";
         private const string CATEGORY_HISTORICAL_DATA = "Settings - HistoricalData";
-        
+        private const string CATEGORY_LOG_INFO = "Settings - Log Info";
+
         private bool _enableEmitData;
         private bool _emitBidAsk;
         private bool _emitBidAskFirst;
@@ -187,5 +188,15 @@ namespace QuantBox.APIProvider.Single
         [Description("【历史】是否过滤数据日期和时间")]
         public bool FilterDateTime { get; set; }
         #endregion
+
+        [Category(CATEGORY_LOG_INFO)]
+        [Description("【日志】是否显示OnRspQryInvestorPosition记录")]
+        public bool IsLogOnRspQryInvestorPosition { get; set; }
+        [Category(CATEGORY_LOG_INFO)]
+        [Description("【日志】是否显示OnRspQryTradingAccount记录")]
+        public bool IsLogOnRspQryTradingAccount { get; set; }
+        [Category(CATEGORY_LOG_INFO)]
+        [Description("【日志】是否显示OnRtnInstrumentStatus记录")]
+        public bool IsLogOnRtnInstrumentStatus { get; set; }
     }
 }

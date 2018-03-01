@@ -98,13 +98,6 @@ namespace QuantBox.APIProvider.Single
         [TypeConverter(typeof(ServerItemConverter))]
         public int Server { get; set; }
 
-        //private BindingList<UserItem> userList = new BindingList<UserItem>();
-        //public BindingList<UserItem> UserList
-        //{
-        //    get { return userList; }
-        //    set { userList = value; }
-        //}
-
         public string LogPrefix { get; set; }
 
 

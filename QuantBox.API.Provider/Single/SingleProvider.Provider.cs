@@ -11,9 +11,6 @@ using System.Threading.Tasks;
 using XAPI;
 using XAPI.Callback;
 
-//using System.Threading.Tasks.Dataflow;
-
-
 namespace QuantBox.APIProvider.Single
 {
     public partial class SingleProvider:Provider

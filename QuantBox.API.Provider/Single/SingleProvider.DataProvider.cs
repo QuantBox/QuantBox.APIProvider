@@ -142,15 +142,16 @@ namespace QuantBox.APIProvider.Single
 
         private void Unsubscribe(MarketDataRecord record)
         {
-            if (_MdApi != null)
+            if (IsApiConnected(_MdApi))
             {
                 _MdApi.GetLog().Info("退订合约:Symbol:{0};InstrumentID:{1};ExchangeID:{2}", record.Instrument, record.Symbol, record.Exchange);
 
                 _MdApi.Unsubscribe(record.Symbol, record.Exchange);
             }
-            if (_QuoteRequestApi != null && SubscribeQuote)
+            if (SubscribeQuote)
             {
-                _QuoteRequestApi.UnsubscribeQuote(record.Symbol, record.Exchange);
+                if (IsApiConnected(_QuoteRequestApi))
+                    _QuoteRequestApi.UnsubscribeQuote(record.Symbol, record.Exchange);
             }
         }
     }

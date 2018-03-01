@@ -79,7 +79,8 @@ namespace QuantBox.APIProvider.Single
             }
             else
             {
-                (sender as XApi).GetLog().Info("OnRspQryTradingAccount:" + account.ToFormattedString());
+                if (IsLogOnRspQryTradingAccount)
+                    (sender as XApi).GetLog().Info("OnRspQryTradingAccount:" + account.ToFormattedString());
             }
 
             // 由策略来收回报
@@ -138,7 +139,8 @@ namespace QuantBox.APIProvider.Single
             else if (position.Position != 0)
             {
                 // UFX中已经过期的持仓也会推送，所以这里过滤一下不显示
-                (sender as XApi).GetLog().Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
+                if (IsLogOnRspQryInvestorPosition)
+                    (sender as XApi).GetLog().Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
             }
 
             // 由策略来收回报
@@ -245,7 +247,8 @@ namespace QuantBox.APIProvider.Single
             _dictInstrumentsStatus[instrumentStatus.Symbol] = instrumentStatus;
 
             // 合约状态信息太多了，也不关心，这里屏蔽显示
-            //(sender as XApi).GetLog().Info("OnRtnInstrumentStatus:" + instrumentStatus.ToFormattedString());
+            if (IsLogOnRtnInstrumentStatus)
+                (sender as XApi).GetLog().Info("OnRtnInstrumentStatus:" + instrumentStatus.ToFormattedString());
         }
 
         public InstrumentStatusField GetInstrumentStatus(string symbol)
