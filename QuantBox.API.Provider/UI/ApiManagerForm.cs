@@ -154,6 +154,7 @@ namespace QuantBox.APIProvider.UI
         public void Init(SingleProvider provider)
         {
             this.provider = provider;
+            provider.Load();
         }
 
         private void ApiManagerForm_Load(object sender, EventArgs e)
@@ -161,6 +162,11 @@ namespace QuantBox.APIProvider.UI
             userItemBindingSource.DataSource = provider.UserList;
             serverItemBindingSource.DataSource = provider.ServerList;
             apiItemBindingSource.DataSource = provider.ApiList;
+        }
+
+        private void ApiManagerForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            provider.Save();
         }
     }
 }

@@ -95,27 +95,31 @@ namespace QuantBox.APIProvider.Single
 
         public void DoOrderSend(ref OrderField[] ordersArray, List<Order> ordersList)
         {
-            // 这里其实返回的是LocalID
-            string outstr = provider._TdApi.SendOrder(ordersArray);
-            string[] OrderIds = outstr.Split(';');
-
-            int i = 0;
-            foreach (var orderId in OrderIds)
+            lock (this)
             {
-                if (string.IsNullOrEmpty(orderId))
+                // 这里其实返回的是LocalID
+                string outstr = provider._TdApi.SendOrder(ordersArray);
+                string[] OrderIds = outstr.Split(';');
+
+                int i = 0;
+                foreach (var orderId in OrderIds)
                 {
-                    // 直接将单子拒绝
-                    EmitExecutionReport(new OrderRecord(ordersList[i]), SQ.ExecType.ExecRejected, SQ.OrderStatus.Rejected, "Provider ErrorCode:" + orderId);
+                    if (string.IsNullOrEmpty(orderId))
+                    {
+                        // 直接将单子拒绝
+                        EmitExecutionReport(new OrderRecord(ordersList[i]), SQ.ExecType.ExecRejected, SQ.OrderStatus.Rejected, "Provider ErrorCode:" + orderId);
+                    }
+                    else
+                    {
+                        // 记下了本地ID,用于立即撤单时供API来定位
+                        this.orderIDs[ordersList[i].Id] = orderId;
+                        //Console.WriteLine(orderId);
+                        this.pendingOrders[orderId] = new OrderRecord(ordersList[i]);
+
+                        ordersList[i].Fields[9] = orderId;
+                    }
+                    ++i;
                 }
-                else
-                {
-                    //Console.WriteLine(orderId);
-                    this.pendingOrders.TryAdd(orderId, new OrderRecord(ordersList[i]));
-                    // 记下了本地ID,用于立即撤单时供API来定位
-                    this.orderIDs.Add(ordersList[i].Id, orderId);
-                    ordersList[i].Fields[9] = orderId;
-                }
-                ++i;
             }
         }
 
@@ -126,47 +130,50 @@ namespace QuantBox.APIProvider.Single
 
         public void DoOrderCancel(List<Order> ordersList)
         {
-            OrderRecord[] recordList = new OrderRecord[ordersList.Count];
-            string[] OrderIds = new string[ordersList.Count];
-
-            for (int i = 0; i < ordersList.Count; ++i)
+            lock (this)
             {
-                // 如果需要下单的过程中撤单，这里有可能返回LocalID或ID
-                if (orderIDs.TryGetValue(ordersList[i].Id, out OrderIds[i]))
-                {
-                    if (this.workingOrders.TryGetValue(OrderIds[i], out recordList[i]))
-                    {
-                        // 订单已经下到柜台上了
-                        pendingCancels[OrderIds[i]] = recordList[i];
-                    }
-                    else if (this.pendingOrders.TryGetValue(OrderIds[i], out recordList[i]))
-                    {
-                        // 订单还没有下到柜台，需要撤单
-                        pendingCancels[OrderIds[i]] = recordList[i];
-                    }
-                }
-                else if (ordersList[i].Fields[9] != null)
-                {
-                    OrderIds[i] = (string)ordersList[i].Fields[9];
-                    recordList[i] = new OrderRecord(ordersList[i]);
-                }
-            }
+                OrderRecord[] recordList = new OrderRecord[ordersList.Count];
+                string[] OrderIds = new string[ordersList.Count];
 
-            string outstr = provider._TdApi.CancelOrder(OrderIds);
-            string[] errs = outstr.Split(';');
-
-            {
-                int i = 0;
-                foreach (var e in errs)
+                for (int i = 0; i < ordersList.Count; ++i)
                 {
-                    if (!string.IsNullOrEmpty(e) && e != "0")
+                    // 如果需要下单的过程中撤单，这里有可能返回LocalID或ID
+                    if (orderIDs.TryGetValue(ordersList[i].Id, out OrderIds[i]))
                     {
-                        if(recordList[i] != null)
+                        if (this.workingOrders.TryGetValue(OrderIds[i], out recordList[i]))
                         {
-                            EmitExecutionReport(recordList[i], SQ.ExecType.ExecCancelReject, recordList[i].Order.Status, "Provider ErrorCode:" + e);
+                            // 订单已经下到柜台上了
+                            pendingCancels[OrderIds[i]] = recordList[i];
+                        }
+                        else if (this.pendingOrders.TryGetValue(OrderIds[i], out recordList[i]))
+                        {
+                            // 订单还没有下到柜台，需要撤单
+                            pendingCancels[OrderIds[i]] = recordList[i];
                         }
                     }
-                    ++i;
+                    else if (ordersList[i].Fields[9] != null)
+                    {
+                        OrderIds[i] = (string)ordersList[i].Fields[9];
+                        recordList[i] = new OrderRecord(ordersList[i]);
+                    }
+                }
+
+                string outstr = provider._TdApi.CancelOrder(OrderIds);
+                string[] errs = outstr.Split(';');
+
+                {
+                    int i = 0;
+                    foreach (var e in errs)
+                    {
+                        if (!string.IsNullOrEmpty(e) && e != "0")
+                        {
+                            if (recordList[i] != null)
+                            {
+                                EmitExecutionReport(recordList[i], SQ.ExecType.ExecCancelReject, recordList[i].Order.Status, "Provider ErrorCode:" + e);
+                            }
+                        }
+                        ++i;
+                    }
                 }
             }
         }
@@ -177,102 +184,119 @@ namespace QuantBox.APIProvider.Single
             if (order.ExecType == XAPI.ExecType.Trade)
                 return;
 
-            OrderRecord record;
-
-            switch (order.ExecType)
+            lock (this)
             {
-                case XAPI.ExecType.New:
-                    if (this.pendingOrders.TryRemove(order.LocalID, out record))
-                    {
-                        this.workingOrders.Add(order.ID, record);
-                        // 将LocalID更新为ID
-                        this.orderIDs[record.Order.Id] = order.ID;
-                        EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
-                    }
-                    else
-                    {
-                        //log.Warn("New,找不到订单，pendingOrders.Count={0}", pendingOrders.Count);
-                    }
-                    break;
-                case XAPI.ExecType.Rejected:
-                    if (this.pendingOrders.TryRemove(order.LocalID, out record))
-                    {
-                        orderIDs.Remove(record.Order.Id);
-                        EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
-                    }
-                    else if (this.workingOrders.TryGetValue(order.ID, out record))
-                    {
-                        // 比如说出现超出涨跌停时，先会到ProcessNew，所以得再多判断一次
-                        workingOrders.Remove(order.ID);
-                        orderIDs.Remove(record.Order.Id);
-                        EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
-                    }
-                    break;
-                case XAPI.ExecType.Cancelled:
-                    if (this.workingOrders.TryGetValue(order.ID, out record))
-                    {
-                        workingOrders.Remove(order.ID);
-                        orderIDs.Remove(record.Order.Id);
-                        EmitExecutionReport(record, SQ.ExecType.ExecCancelled, SQ.OrderStatus.Cancelled);
-                    }
-                    else if (this.pendingOrders.TryRemove(order.LocalID, out record))
-                    {
-                        orderIDs.Remove(record.Order.Id);
-                        EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
-                    }
-                    break;
-                case XAPI.ExecType.PendingCancel:
-                    if (this.workingOrders.TryGetValue(order.ID, out record))
-                    {
-                        EmitExecutionReport(record, SQ.ExecType.ExecPendingCancel, SQ.OrderStatus.PendingCancel);
-                    }
-                    break;
-                case XAPI.ExecType.CancelReject:
-                    if (this.pendingCancels.TryRemove(order.ID, out record))
-                    {
-                        EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
-                    }
-                    else if (this.pendingCancels.TryRemove(order.LocalID, out record))
-                    {
-                        EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
-                    }
-                    break;
+                OrderRecord record;
+
+                switch (order.ExecType)
+                {
+                    case XAPI.ExecType.New:
+                        if (this.pendingOrders.TryRemove(order.LocalID, out record))
+                        {
+                            this.workingOrders[order.ID] = record;
+                            // 将LocalID更新为ID
+                            this.orderIDs[record.Order.Id] = order.ID;
+                            EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
+                        }
+                        else
+                        {
+                            //log.Warn("New,找不到订单，pendingOrders.Count={0}", pendingOrders.Count);
+                        }
+                        break;
+                    case XAPI.ExecType.Rejected:
+                        if (this.pendingOrders.TryRemove(order.LocalID, out record))
+                        {
+                            orderIDs.Remove(record.Order.Id);
+                            EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
+                        }
+                        else if (this.workingOrders.TryGetValue(order.ID, out record))
+                        {
+                            // 比如说出现超出涨跌停时，先会到ProcessNew，所以得再多判断一次
+                            workingOrders.Remove(order.ID);
+                            orderIDs.Remove(record.Order.Id);
+                            EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
+                        }
+                        break;
+                    case XAPI.ExecType.Cancelled:
+                        if (this.workingOrders.TryGetValue(order.ID, out record))
+                        {
+                            workingOrders.Remove(order.ID);
+                            orderIDs.Remove(record.Order.Id);
+                            EmitExecutionReport(record, SQ.ExecType.ExecCancelled, SQ.OrderStatus.Cancelled);
+                        }
+                        else if (this.pendingOrders.TryRemove(order.LocalID, out record))
+                        {
+                            orderIDs.Remove(record.Order.Id);
+                            EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
+                        }
+                        break;
+                    case XAPI.ExecType.PendingCancel:
+                        if (this.workingOrders.TryGetValue(order.ID, out record))
+                        {
+                            EmitExecutionReport(record, SQ.ExecType.ExecPendingCancel, SQ.OrderStatus.PendingCancel);
+                        }
+                        else if (this.pendingOrders.TryGetValue(order.LocalID, out record))
+                        {
+                            EmitExecutionReport(record, SQ.ExecType.ExecPendingCancel, SQ.OrderStatus.PendingCancel);
+                        }
+                        break;
+                    case XAPI.ExecType.CancelReject:
+                        if (this.pendingCancels.TryRemove(order.ID, out record))
+                        {
+                            // 已经收到第一回报的情况下
+                            EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
+                        }
+                        else if (this.pendingCancels.TryRemove(order.LocalID, out record))
+                        {
+                            // 没有收到第一条回报的情况下
+                            EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
+                        }
+                        //else if (this.workingOrders.TryGetValue(order.ID, out record))
+                        //{
+                        //    // 撤单回报延时的情况下
+                        //    EmitExecutionReport(record, SQ.ExecType.ExecCancelReject, (SQ.OrderStatus)order.Status, order.Text());
+                        //}
+                        break;
+                }
             }
         }
 
         public void Process(ref TradeField trade, NLog.Logger log)
         {
-            OrderRecord record;
-            if (!workingOrders.TryGetValue(trade.ID, out record))
+            lock(this)
             {
-                record = GetExternalOrder(ref trade);
-            }
-            if (record != null)
-            {
-                record.AddFill(trade.Price, (int)trade.Qty);
-                SQ.ExecType execType = SQ.ExecType.ExecTrade;
-                SQ.OrderStatus orderStatus = (record.LeavesQty > 0) ? SQ.OrderStatus.PartiallyFilled : SQ.OrderStatus.Filled;
-                ExecutionReport report = CreateReport(record, execType, orderStatus);
-                report.LastPx = trade.Price;
-                report.LastQty = trade.Qty;
-                provider.EmitExecutionReport(report);
-            }
-            else
-            {
-                // log.Warn("Trade,找不到订单，workingOrders.Count={0}", workingOrders.Count);
+                OrderRecord record;
+                if (!workingOrders.TryGetValue(trade.ID, out record))
+                {
+                    record = GetExternalOrder(ref trade);
+                }
+                if (record != null)
+                {
+                    record.AddFill(trade.Price, (int)trade.Qty);
+                    SQ.ExecType execType = SQ.ExecType.ExecTrade;
+                    SQ.OrderStatus orderStatus = (record.LeavesQty > 0) ? SQ.OrderStatus.PartiallyFilled : SQ.OrderStatus.Filled;
+                    ExecutionReport report = CreateReport(record, execType, orderStatus);
+                    report.LastPx = trade.Price;
+                    report.LastQty = trade.Qty;
+                    provider.EmitExecutionReport(report);
+                }
+                else
+                {
+                    // log.Warn("Trade,找不到订单，workingOrders.Count={0}", workingOrders.Count);
+                }
             }
         }
 
         public void ProcessNew(ref QuoteField quote, QuoteRecord record)
         {
             OrderRecord askRecord = new OrderRecord(record.AskOrder);
-            this.workingOrders.Add(quote.AskID, askRecord);
-            this.orderIDs.Add(askRecord.Order.Id, quote.AskID);
+            this.workingOrders[quote.AskID] = askRecord;
+            this.orderIDs[askRecord.Order.Id] = quote.AskID;
             EmitExecutionReport(askRecord, (SQ.ExecType)quote.ExecType, (SQ.OrderStatus)quote.Status);
 
             OrderRecord bidRecord = new OrderRecord(record.BidOrder);
-            this.workingOrders.Add(quote.BidID, bidRecord);
-            this.orderIDs.Add(bidRecord.Order.Id, quote.BidID);
+            this.workingOrders[quote.BidID] = bidRecord;
+            this.orderIDs[bidRecord.Order.Id] = quote.BidID;
             EmitExecutionReport(bidRecord, (SQ.ExecType)quote.ExecType, (SQ.OrderStatus)quote.Status);
         }
     }

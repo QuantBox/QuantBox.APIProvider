@@ -245,39 +245,45 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRtnOrder_callback(object sender, ref OrderField order)
         {
-            var log = (sender as XApi).GetLog();
-            log.Debug("OnRtnOrder:" + order.ToFormattedString());
-
-            // 由策略来收回报
-            if (OnRtnOrder != null)
-                OnRtnOrder(sender, ref order);
-
-            try
+            lock (this)
             {
-                orderMap.Process(ref order, log);
-            }
-            catch (Exception ex)
-            {
-                log.Error(ex);
+                var log = (sender as XApi).GetLog();
+                log.Debug("OnRtnOrder:" + order.ToFormattedString());
+
+                // 由策略来收回报
+                if (OnRtnOrder != null)
+                    OnRtnOrder(sender, ref order);
+
+                try
+                {
+                    orderMap.Process(ref order, log);
+                }
+                catch (Exception ex)
+                {
+                    log.Error(ex);
+                }
             }
         }
 
         private void OnRtnTrade_callback(object sender, ref TradeField trade)
         {
-            var log = (sender as XApi).GetLog();
-            log.Debug("OnRtnTrade:" + trade.ToFormattedString());
-
-            // 由策略来收回报
-            if (OnRtnTrade != null)
-                OnRtnTrade(sender, ref trade);
-
-            try
+            lock(this)
             {
-                orderMap.Process(ref trade, log);
-            }
-            catch (Exception ex)
-            {
-                log.Error(ex);
+                var log = (sender as XApi).GetLog();
+                log.Debug("OnRtnTrade:" + trade.ToFormattedString());
+
+                // 由策略来收回报
+                if (OnRtnTrade != null)
+                    OnRtnTrade(sender, ref trade);
+
+                try
+                {
+                    orderMap.Process(ref trade, log);
+                }
+                catch (Exception ex)
+                {
+                    log.Error(ex);
+                }
             }
         }
     }

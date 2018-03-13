@@ -61,9 +61,11 @@
             this.listBox_UserList.DataSource = this.userItemBindingSource;
             this.listBox_UserList.FormattingEnabled = true;
             this.listBox_UserList.HorizontalScrollbar = true;
-            this.listBox_UserList.Location = new System.Drawing.Point(14, 19);
+            this.listBox_UserList.ItemHeight = 15;
+            this.listBox_UserList.Location = new System.Drawing.Point(19, 22);
+            this.listBox_UserList.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listBox_UserList.Name = "listBox_UserList";
-            this.listBox_UserList.Size = new System.Drawing.Size(313, 108);
+            this.listBox_UserList.Size = new System.Drawing.Size(416, 124);
             this.listBox_UserList.TabIndex = 0;
             this.listBox_UserList.SelectedIndexChanged += new System.EventHandler(this.listBox_UserList_SelectedIndexChanged);
             // 
@@ -76,9 +78,10 @@
             this.propertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.propertyGrid.Location = new System.Drawing.Point(439, -1);
+            this.propertyGrid.Location = new System.Drawing.Point(585, -1);
+            this.propertyGrid.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.propertyGrid.Name = "propertyGrid";
-            this.propertyGrid.Size = new System.Drawing.Size(435, 468);
+            this.propertyGrid.Size = new System.Drawing.Size(580, 540);
             this.propertyGrid.TabIndex = 1;
             this.propertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid_PropertyValueChanged);
             // 
@@ -88,18 +91,21 @@
             this.groupBox1.Controls.Add(this.button_RemoveUser);
             this.groupBox1.Controls.Add(this.button_AddUser);
             this.groupBox1.Controls.Add(this.listBox_UserList);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
+            this.groupBox1.Location = new System.Drawing.Point(16, 14);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(421, 142);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox1.Size = new System.Drawing.Size(561, 164);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "UserList";
             // 
             // button_CopyUser
             // 
-            this.button_CopyUser.Location = new System.Drawing.Point(333, 77);
+            this.button_CopyUser.Location = new System.Drawing.Point(444, 89);
+            this.button_CopyUser.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_CopyUser.Name = "button_CopyUser";
-            this.button_CopyUser.Size = new System.Drawing.Size(75, 23);
+            this.button_CopyUser.Size = new System.Drawing.Size(100, 27);
             this.button_CopyUser.TabIndex = 1;
             this.button_CopyUser.Text = "Copy";
             this.button_CopyUser.UseVisualStyleBackColor = true;
@@ -107,9 +113,10 @@
             // 
             // button_RemoveUser
             // 
-            this.button_RemoveUser.Location = new System.Drawing.Point(333, 48);
+            this.button_RemoveUser.Location = new System.Drawing.Point(444, 55);
+            this.button_RemoveUser.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_RemoveUser.Name = "button_RemoveUser";
-            this.button_RemoveUser.Size = new System.Drawing.Size(75, 23);
+            this.button_RemoveUser.Size = new System.Drawing.Size(100, 27);
             this.button_RemoveUser.TabIndex = 1;
             this.button_RemoveUser.Text = "Remove";
             this.button_RemoveUser.UseVisualStyleBackColor = true;
@@ -117,9 +124,10 @@
             // 
             // button_AddUser
             // 
-            this.button_AddUser.Location = new System.Drawing.Point(333, 19);
+            this.button_AddUser.Location = new System.Drawing.Point(444, 22);
+            this.button_AddUser.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_AddUser.Name = "button_AddUser";
-            this.button_AddUser.Size = new System.Drawing.Size(75, 23);
+            this.button_AddUser.Size = new System.Drawing.Size(100, 27);
             this.button_AddUser.TabIndex = 1;
             this.button_AddUser.Text = "Add";
             this.button_AddUser.UseVisualStyleBackColor = true;
@@ -131,18 +139,21 @@
             this.groupBox2.Controls.Add(this.button_RemoveServer);
             this.groupBox2.Controls.Add(this.listBox_ServerList);
             this.groupBox2.Controls.Add(this.button_AddServer);
-            this.groupBox2.Location = new System.Drawing.Point(12, 160);
+            this.groupBox2.Location = new System.Drawing.Point(16, 185);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(421, 142);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox2.Size = new System.Drawing.Size(561, 164);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "ServerList";
             // 
             // button_CopyServer
             // 
-            this.button_CopyServer.Location = new System.Drawing.Point(333, 80);
+            this.button_CopyServer.Location = new System.Drawing.Point(444, 92);
+            this.button_CopyServer.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_CopyServer.Name = "button_CopyServer";
-            this.button_CopyServer.Size = new System.Drawing.Size(75, 23);
+            this.button_CopyServer.Size = new System.Drawing.Size(100, 27);
             this.button_CopyServer.TabIndex = 1;
             this.button_CopyServer.Text = "Copy";
             this.button_CopyServer.UseVisualStyleBackColor = true;
@@ -150,9 +161,10 @@
             // 
             // button_RemoveServer
             // 
-            this.button_RemoveServer.Location = new System.Drawing.Point(333, 51);
+            this.button_RemoveServer.Location = new System.Drawing.Point(444, 59);
+            this.button_RemoveServer.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_RemoveServer.Name = "button_RemoveServer";
-            this.button_RemoveServer.Size = new System.Drawing.Size(75, 23);
+            this.button_RemoveServer.Size = new System.Drawing.Size(100, 27);
             this.button_RemoveServer.TabIndex = 1;
             this.button_RemoveServer.Text = "Remove";
             this.button_RemoveServer.UseVisualStyleBackColor = true;
@@ -163,17 +175,20 @@
             this.listBox_ServerList.DataSource = this.serverItemBindingSource;
             this.listBox_ServerList.FormattingEnabled = true;
             this.listBox_ServerList.HorizontalScrollbar = true;
-            this.listBox_ServerList.Location = new System.Drawing.Point(14, 19);
+            this.listBox_ServerList.ItemHeight = 15;
+            this.listBox_ServerList.Location = new System.Drawing.Point(19, 22);
+            this.listBox_ServerList.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listBox_ServerList.Name = "listBox_ServerList";
-            this.listBox_ServerList.Size = new System.Drawing.Size(313, 108);
+            this.listBox_ServerList.Size = new System.Drawing.Size(416, 124);
             this.listBox_ServerList.TabIndex = 0;
             this.listBox_ServerList.SelectedIndexChanged += new System.EventHandler(this.listBox_ServerList_SelectedIndexChanged);
             // 
             // button_AddServer
             // 
-            this.button_AddServer.Location = new System.Drawing.Point(333, 22);
+            this.button_AddServer.Location = new System.Drawing.Point(444, 25);
+            this.button_AddServer.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_AddServer.Name = "button_AddServer";
-            this.button_AddServer.Size = new System.Drawing.Size(75, 23);
+            this.button_AddServer.Size = new System.Drawing.Size(100, 27);
             this.button_AddServer.TabIndex = 1;
             this.button_AddServer.Text = "Add";
             this.button_AddServer.UseVisualStyleBackColor = true;
@@ -187,18 +202,21 @@
             this.groupBox3.Controls.Add(this.button_RemoveApi);
             this.groupBox3.Controls.Add(this.listBox_ApiList);
             this.groupBox3.Controls.Add(this.button_AddApi);
-            this.groupBox3.Location = new System.Drawing.Point(12, 314);
+            this.groupBox3.Location = new System.Drawing.Point(16, 362);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(421, 142);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox3.Size = new System.Drawing.Size(561, 164);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "ApiList";
             // 
             // button_CopyApi
             // 
-            this.button_CopyApi.Location = new System.Drawing.Point(333, 76);
+            this.button_CopyApi.Location = new System.Drawing.Point(444, 88);
+            this.button_CopyApi.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_CopyApi.Name = "button_CopyApi";
-            this.button_CopyApi.Size = new System.Drawing.Size(75, 23);
+            this.button_CopyApi.Size = new System.Drawing.Size(100, 27);
             this.button_CopyApi.TabIndex = 1;
             this.button_CopyApi.Text = "Copy";
             this.button_CopyApi.UseVisualStyleBackColor = true;
@@ -206,9 +224,10 @@
             // 
             // button_RemoveApi
             // 
-            this.button_RemoveApi.Location = new System.Drawing.Point(333, 47);
+            this.button_RemoveApi.Location = new System.Drawing.Point(444, 54);
+            this.button_RemoveApi.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_RemoveApi.Name = "button_RemoveApi";
-            this.button_RemoveApi.Size = new System.Drawing.Size(75, 23);
+            this.button_RemoveApi.Size = new System.Drawing.Size(100, 27);
             this.button_RemoveApi.TabIndex = 1;
             this.button_RemoveApi.Text = "Remove";
             this.button_RemoveApi.UseVisualStyleBackColor = true;
@@ -222,9 +241,11 @@
             this.listBox_ApiList.DataSource = this.apiItemBindingSource;
             this.listBox_ApiList.FormattingEnabled = true;
             this.listBox_ApiList.HorizontalScrollbar = true;
-            this.listBox_ApiList.Location = new System.Drawing.Point(14, 19);
+            this.listBox_ApiList.ItemHeight = 15;
+            this.listBox_ApiList.Location = new System.Drawing.Point(19, 22);
+            this.listBox_ApiList.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listBox_ApiList.Name = "listBox_ApiList";
-            this.listBox_ApiList.Size = new System.Drawing.Size(313, 108);
+            this.listBox_ApiList.Size = new System.Drawing.Size(416, 124);
             this.listBox_ApiList.TabIndex = 0;
             this.listBox_ApiList.SelectedIndexChanged += new System.EventHandler(this.listBox_ApiList_SelectedIndexChanged);
             // 
@@ -234,9 +255,10 @@
             // 
             // button_AddApi
             // 
-            this.button_AddApi.Location = new System.Drawing.Point(333, 18);
+            this.button_AddApi.Location = new System.Drawing.Point(444, 21);
+            this.button_AddApi.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_AddApi.Name = "button_AddApi";
-            this.button_AddApi.Size = new System.Drawing.Size(75, 23);
+            this.button_AddApi.Size = new System.Drawing.Size(100, 27);
             this.button_AddApi.TabIndex = 1;
             this.button_AddApi.Text = "Add";
             this.button_AddApi.UseVisualStyleBackColor = true;
@@ -244,15 +266,17 @@
             // 
             // ApiManagerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(873, 468);
+            this.ClientSize = new System.Drawing.Size(1164, 540);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.propertyGrid);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "ApiManagerForm";
             this.Text = "ApiManagerForm";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ApiManagerForm_FormClosed);
             this.Load += new System.EventHandler(this.ApiManagerForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.userItemBindingSource)).EndInit();
             this.groupBox1.ResumeLayout(false);

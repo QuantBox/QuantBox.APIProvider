@@ -35,7 +35,8 @@ namespace QuantBox.APIProvider.Single
 
         ~SingleProvider()
         {
-            Save();
+            // OQ多开时，其中一个改了，另一个关闭会导致保存丢失
+            // Save();
         }
 
         private static JsonSerializerSettings jSetting = new JsonSerializerSettings()
@@ -86,7 +87,7 @@ namespace QuantBox.APIProvider.Single
             historicalDataIds = new Dictionary<string,int>();
 
             // ConfigPath在做Setting时已经做了
-            Load();
+            //Load();
         }
 
         void SessionTimeList_ListChanged(object sender, ListChangedEventArgs e)
@@ -137,7 +138,7 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
-        internal void Save()
+        public void Save()
         {
             Save(ConfigPath, "SessionTimeList.json", SessionTimeList);
             Save(ConfigPath, "ServerList.json", ServerList);
@@ -145,7 +146,7 @@ namespace QuantBox.APIProvider.Single
             Save(ConfigPath, "ApiList.json", ApiList);
         }
 
-        private void Load()
+        public void Load()
         {
             SessionTimeList = new BindingList<SessionTimeItem>();
             UserList = new BindingList<UserItem>();
@@ -188,6 +189,8 @@ namespace QuantBox.APIProvider.Single
 
         protected override void OnConnect()
         {
+            Load();
+
             _QueryAccountCount = _QueryAccountInterval;
             _QueryPositionCount = _QueryPositionInterval;
 
@@ -210,6 +213,8 @@ namespace QuantBox.APIProvider.Single
             xlog.Info("重连检测定时器关闭");
 
             _Disconnect(true);
+
+            Save();
         }
 
         public override void Clear()

@@ -133,16 +133,7 @@ namespace QuantBox.APIProvider.Single
         [Category(CATEGORY_COMMON)]
         [Description("配置文件路径")]
         [Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(UITypeEditor))]
-        public string ConfigPath
-        {
-            get { return _configPath; }
-            set
-            {
-                _configPath = value;
-                Load();
-            }
-        }
-        private string _configPath;
+        public string ConfigPath { get; set; }
 
         [Category(CATEGORY_COMMON)]
         [Description("交易时段列表，当前时间在这些列表中将启用重连机制，不在此列表中将主动断开，列表为空将不处理")]
