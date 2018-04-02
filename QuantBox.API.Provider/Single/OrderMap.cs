@@ -207,6 +207,7 @@ namespace QuantBox.APIProvider.Single
                         if (this.pendingOrders.TryRemove(order.LocalID, out record))
                         {
                             orderIDs.Remove(record.Order.Id);
+                            record.LeavesQty = 0;
                             EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
                         }
                         else if (this.workingOrders.TryGetValue(order.ID, out record))
@@ -214,6 +215,7 @@ namespace QuantBox.APIProvider.Single
                             // 比如说出现超出涨跌停时，先会到ProcessNew，所以得再多判断一次
                             workingOrders.Remove(order.ID);
                             orderIDs.Remove(record.Order.Id);
+                            record.LeavesQty = 0;
                             EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
                         }
                         break;
@@ -222,11 +224,13 @@ namespace QuantBox.APIProvider.Single
                         {
                             workingOrders.Remove(order.ID);
                             orderIDs.Remove(record.Order.Id);
+                            record.LeavesQty = 0;
                             EmitExecutionReport(record, SQ.ExecType.ExecCancelled, SQ.OrderStatus.Cancelled);
                         }
                         else if (this.pendingOrders.TryRemove(order.LocalID, out record))
                         {
                             orderIDs.Remove(record.Order.Id);
+                            record.LeavesQty = 0;
                             EmitExecutionReport(record, (SQ.ExecType)order.ExecType, (SQ.OrderStatus)order.Status, order.Text());
                         }
                         break;
