@@ -22,6 +22,7 @@ namespace QuantBox.APIProvider.Single
         // Order.ID与LocalID或ID的映射，没有收到回报时是LocalID，收到后要更新为ID
         private Dictionary<int, string> orderIDs;   // 撤单时映射
         private ConcurrentDictionary<string, OrderRecord> pendingCancels;   // 撤单拒绝时使用
+        private ConcurrentDictionary<string, TradeField> tradesDict; // 防止重复收到成交回报
         private OrderRecord GetExternalOrder(ref TradeField field)
         {
             ExternalOrderRecord record;
@@ -71,6 +72,7 @@ namespace QuantBox.APIProvider.Single
             workingOrders = new Dictionary<string, OrderRecord>();
             orderIDs = new Dictionary<int, string>();
             pendingCancels = new ConcurrentDictionary<string, OrderRecord>();
+            tradesDict = new ConcurrentDictionary<string, TradeField>();
         }
 
         public void Clear()
@@ -79,6 +81,7 @@ namespace QuantBox.APIProvider.Single
             workingOrders.Clear();
             orderIDs.Clear();
             pendingCancels.Clear();
+            tradesDict.Clear();
         }
 
         public void DoOrderSend(ref OrderField[] ordersArray, Order order)
@@ -267,7 +270,7 @@ namespace QuantBox.APIProvider.Single
 
         public void Process(ref TradeField trade, NLog.Logger log)
         {
-            lock(this)
+            lock (this)
             {
                 OrderRecord record;
                 if (!workingOrders.TryGetValue(trade.ID, out record))
@@ -276,6 +279,30 @@ namespace QuantBox.APIProvider.Single
                 }
                 if (record != null)
                 {
+                    // CTP出现过重复发送委托与成交的情况，需要过滤。并提示
+                    // 同一交易ID同一方向不会同时出现，出现表示系统重复提示
+                    // 不向方向表示自成交了
+                    TradeField field = null;
+                    if (tradesDict.TryGetValue(trade.TradeID, out field))
+                    {
+                        // 有取出，可能是自成交，也可能是重复发单
+                        if (trade.Side == field.Side)
+                        {
+                            log.Error("重复收到成交回报！");
+                            // 后面不再处理
+                            return;
+                        }
+                        else
+                        {
+                            log.Warn("出现自成交！");
+                            // 自成交也得处理
+                        }
+                    }
+                    else
+                    {
+                        tradesDict[trade.TradeID] = trade;
+                    }
+
                     record.AddFill(trade.Price, (int)trade.Qty);
                     SQ.ExecType execType = SQ.ExecType.ExecTrade;
                     SQ.OrderStatus orderStatus = (record.LeavesQty > 0) ? SQ.OrderStatus.PartiallyFilled : SQ.OrderStatus.Filled;
