@@ -176,67 +176,80 @@ namespace QuantBox.APIProvider.Single
 
         private void FireBid(SortedSet<int> Ids, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
         {
-            do
-            {
-                if (pDepthMarketData.Bids == null || pDepthMarketData.Bids.Length == 0)
-                    break;
+            double price = 0.0;
+            int size = 0;
 
+            // 当出现涨跌停时，有可能是一开始就是涨跌停，也有可能慢慢变成涨跌停
+            if(pDepthMarketData.Bids == null || pDepthMarketData.Bids.Length == 0)
+            {
+            }
+            else
+            {
                 if (DepthMarket.Bids != null && DepthMarket.Bids.Length > 0)
                 {
                     if (DepthMarket.Bids[0].Size == pDepthMarketData.Bids[0].Size
                     && DepthMarket.Bids[0].Price == pDepthMarketData.Bids[0].Price)
                     {
                         // 由于与上次一样，不能动
-                        break;
+                        return;
                     }
                 }
 
-                foreach (var _id in Ids)
-                {
-                    Bid bid = new Bid(
-                        _dateTime,
-                        _exchangeDateTime,
-                        id,
-                        _id,
-                        pDepthMarketData.Bids[0].Price,
-                        pDepthMarketData.Bids[0].Size);
+                price = pDepthMarketData.Bids[0].Price;
+                size = pDepthMarketData.Bids[0].Size;
+            }
+            
+            foreach (var _id in Ids)
+            {
+                Bid bid = new Bid(
+                    _dateTime,
+                    _exchangeDateTime,
+                    id,
+                    _id,
+                    price,
+                    size);
 
-                    EmitData(bid);
-                }
-            } while (false);
+                EmitData(bid);
+            }
         }
 
         private void FireAsk(SortedSet<int> Ids, DateTime _dateTime, DateTime _exchangeDateTime, DepthMarketDataNClass pDepthMarketData, DepthMarketDataNClass DepthMarket)
         {
-            do
-            {
-                if (pDepthMarketData.Asks == null || pDepthMarketData.Asks.Length == 0)
-                    break;
+            double price = 0.0;
+            int size = 0;
 
+            // 当出现涨跌停时，有可能是一开始就是涨跌停，也有可能慢慢变成涨跌停
+            if (pDepthMarketData.Asks == null || pDepthMarketData.Asks.Length == 0)
+            {
+            }
+            else
+            {
                 if (DepthMarket.Asks != null && DepthMarket.Asks.Length > 0)
                 {
                     if (DepthMarket.Asks[0].Size == pDepthMarketData.Asks[0].Size
                     && DepthMarket.Asks[0].Price == pDepthMarketData.Asks[0].Price)
                     {
                         // 由于与上次一样，不能动
-                        break;
+                        return;
                     }
-
                 }
 
-                foreach (var _id in Ids)
-                {
-                    Ask ask = new Ask(
-                        _dateTime,
-                        _exchangeDateTime,
-                        id,
-                        _id,
-                        pDepthMarketData.Asks[0].Price,
-                        pDepthMarketData.Asks[0].Size);
+                price = pDepthMarketData.Asks[0].Price;
+                size = pDepthMarketData.Asks[0].Size;
+            }
 
-                    EmitData(ask);
-                }
-            } while (false);
+            foreach (var _id in Ids)
+            {
+                Ask ask = new Ask(
+                    _dateTime,
+                    _exchangeDateTime,
+                    id,
+                    _id,
+                    price,
+                    size);
+
+                EmitData(ask);
+            }
         }
     }
 }
