@@ -45,13 +45,18 @@ namespace QuantBox.APIProvider.Single
         /// <summary>
         /// 用户端产品信息
         /// </summary>
-        [Category("客户端认证 - CTP/LTS")]
+        [Category("客户端认证")]
         public string UserProductInfo { get; set; }
         /// <summary>
         /// 认证码
         /// </summary>
-        [Category("客户端认证 - CTP/LTS")]
+        [Category("客户端认证")]
         public string AuthCode { get; set; }
+        /// <summary>
+        /// App认证码
+        /// </summary>
+        [Category("客户端认证")]
+        public string AppID { get; set; }
         /// <summary>
         /// 地址
         /// </summary>
@@ -101,6 +106,7 @@ namespace QuantBox.APIProvider.Single
             field.BrokerID = this.BrokerID;
             field.UserProductInfo = this.UserProductInfo;
             field.AuthCode = this.AuthCode;
+            field.AppID = this.AppID;
             field.Address = this.Address;
             field.ConfigPath = this.ConfigPath;
             field.ExtInfoChar128 = this.ExtInfoChar128;
