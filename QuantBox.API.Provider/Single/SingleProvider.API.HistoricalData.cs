@@ -155,7 +155,7 @@ namespace QuantBox.APIProvider.Single
                 volume = obj.Volume;
             }
 
-            if(EmitHistoricalData)
+            if(EnablEmitHistoricalData)
             {
                 HistoricalData data = new HistoricalData
                 {
@@ -217,7 +217,7 @@ namespace QuantBox.APIProvider.Single
                 }
             }
 
-            if(EmitHistoricalData)
+            if(EnablEmitHistoricalData)
             {
                 HistoricalData data = new HistoricalData
                 {

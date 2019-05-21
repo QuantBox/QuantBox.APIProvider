@@ -173,7 +173,7 @@ namespace QuantBox.APIProvider.Single
         [Category(CATEGORY_HISTORICAL_DATA)]
         [Description("【历史】是否触发EmitHistoricalData事件")]
         [DisplayName("EmitHistoricalData")]
-        public bool EmitHistoricalData { get; set; }
+        public bool EnablEmitHistoricalData { get; set; }
 
         [Category(CATEGORY_HISTORICAL_DATA)]
         [Description("【历史】是否过滤数据日期和时间")]

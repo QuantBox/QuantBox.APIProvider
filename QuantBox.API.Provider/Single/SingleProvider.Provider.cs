@@ -64,7 +64,7 @@ namespace QuantBox.APIProvider.Single
             EmitBidAsk = true;
             EmitLevel2Snapshot = false;
             //UpdateInstrument = true;
-            EmitHistoricalData = true;
+            EnablEmitHistoricalData = true;
             FilterDateTime = true;
             EnableEmitData = true;
             HasPriceLimit = true;
