@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using XAPI;
 using NLog;
 using QuantBox.Extensions;
+using System.Threading;
 
 namespace QuantBox.APIProvider.Single
 {
@@ -133,6 +134,83 @@ namespace QuantBox.APIProvider.Single
         }
 
 
+        private void CheckConnection(System.Timers.ElapsedEventArgs e)
+        {
+            do
+            {
+                // 列表为空，表示不处理。这时没有自动重连
+                if (SessionTimeList == null || SessionTimeList.Count == 0)
+                    break;
+
+                var stl = SessionTimeList.Where(x => x.Enable).ToList();
+                if (stl.Count == 0)
+                    break;
+
+                bool bTryConnect = true;
+
+                SessionTimeItem st_current = null;
+                SessionTimeItem st_next = null;
+                foreach (var st in stl)
+                {
+                    // 如果当前时间在交易范围内，要开启重连
+                    // 如果当前时间不在交易范围内，要主动断开
+                    TimeSpan ts = e.SignalTime.TimeOfDay;
+                    if (!st.Enable)
+                        continue;
+
+                    if (ts < st.SessionStart)
+                    {
+                        // 停
+                        bTryConnect = false;
+                        st_next = st;
+                    }
+                    else if (ts <= st.SessionEnd)
+                    {
+                        // 启动
+                        bTryConnect = true;
+                        st_current = st;
+                        break;
+                    }
+                    else
+                    {
+                        // 停
+                        bTryConnect = false;
+                        st_next = st;
+                    }
+                }
+
+                if (bTryConnect)
+                {
+                    // 没有连接要连上，有连接要设置时间
+                    if (!IsConnected)
+                    {
+                        xlog.Info("当前[{0}]在交易时段[{1}]，主动连接", e.SignalTime.TimeOfDay, st_current);
+                        _Connect(false);
+                    }
+
+                    // 初始化查询间隔
+                    SetApiReconnectInterval(_ReconnectInterval);
+
+                    nDisconnectCount = 0;
+                }
+                else
+                {
+                    // 关闭查询间隔
+                    SetApiReconnectInterval(0);
+                    // 由于定时器设置的是20秒，所以这里正好是5分钟显示一次
+                    if (nDisconnectCount % (3 * 5) == 0)
+                    {
+                        xlog.Info("当前[{0}]在非交易时段，主动断开连接，下次要连接的时段为[{1}]", e.SignalTime.TimeOfDay, st_next);
+
+                        // 要断开连接
+                        _Disconnect(false);
+                    }
+                    ++nDisconnectCount;
+                }
+            } while (false);
+        }
+
+
         private int nDisconnectCount = 0;
         void _Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -140,78 +218,7 @@ namespace QuantBox.APIProvider.Single
             {
                 _Timer.Enabled = false;
 
-                do
-                {
-                    // 列表为空，表示不处理。这时没有自动重连
-                    if (SessionTimeList == null || SessionTimeList.Count == 0)
-                        break;
-
-                    var stl = SessionTimeList.Where(x => x.Enable).ToList();
-                    if (stl.Count == 0)
-                        break;
-
-                    bool bTryConnect = true;
-
-                    SessionTimeItem st_current = null;
-                    SessionTimeItem st_next = null;
-                    foreach (var st in stl)
-                    {
-                        // 如果当前时间在交易范围内，要开启重连
-                        // 如果当前时间不在交易范围内，要主动断开
-                        TimeSpan ts = e.SignalTime.TimeOfDay;
-                        if (!st.Enable)
-                            continue;
-
-                        if (ts < st.SessionStart)
-                        {
-                            // 停
-                            bTryConnect = false;
-                            st_next = st;
-                        }
-                        else if (ts <= st.SessionEnd)
-                        {
-                            // 启动
-                            bTryConnect = true;
-                            st_current = st;
-                            break;
-                        }
-                        else
-                        {
-                            // 停
-                            bTryConnect = false;
-                            st_next = st;
-                        }
-                    }
-
-                    if (bTryConnect)
-                    {
-                        // 没有连接要连上，有连接要设置时间
-                        if (!IsConnected)
-                        {
-                            xlog.Info("当前[{0}]在交易时段[{1}]，主动连接", e.SignalTime.TimeOfDay, st_current);
-                            _Connect(false);
-                        }
-
-                        // 初始化查询间隔
-                        SetApiReconnectInterval(_ReconnectInterval);
-
-                        nDisconnectCount = 0;
-                    }
-                    else
-                    {
-                        // 关闭查询间隔
-                        SetApiReconnectInterval(0);
-                        // 由于定时器设置的是20秒，所以这里正好是5分钟显示一次
-                        if (nDisconnectCount % (3 * 5) == 0)
-                        {
-                            xlog.Info("当前[{0}]在非交易时段，主动断开连接，下次要连接的时段为[{1}]", e.SignalTime.TimeOfDay, st_next);
-
-                            // 要断开连接
-                            _Disconnect(false);
-                        }
-                        ++nDisconnectCount;
-                    }
-                } while (false);
+                CheckConnection(e);
 
                 // 查询持仓和资金
                 QueryAccountPosition_OnTimer();
@@ -278,6 +285,7 @@ namespace QuantBox.APIProvider.Single
             {
                 base.Status = ProviderStatus.Connected;
 
+                // 这个查询不能太快，否则CTP报错
                 QueryAccountPositionInstrument_Logined();
             }
         }
@@ -519,25 +527,43 @@ namespace QuantBox.APIProvider.Single
 
         private void QueryAccountPositionInstrument_Logined()
         {
+            // OnRtnError:[XErrorID = 0; RawErrorID = 90; Text = CTP:查询未就绪，请稍后重试; Source = OnRspError]
+            Thread thread2 = new Thread(QueryAccountPositionInstrument_Thread);
+            thread2.Start();
+        }
+
+        private void QueryAccountPositionInstrument_Thread()
+        {
+            
+
             ReqQueryField query = new ReqQueryField();
             query.PortfolioID1 = DefaultPortfolioID1;
             query.PortfolioID2 = DefaultPortfolioID2;
             query.PortfolioID3 = DefaultPortfolioID3;
             query.Business = DefaultBusiness;
 
-            // 查持仓，查资金
-            if (IsApiConnected(_QueryApi))
-            {
-                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
-                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
-            }
-
             // 查合约
             if (IsApiConnected(_ItApi))
             {
+                Thread.Sleep(3000);
                 _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
             }
+
+            // 查持仓，查资金
+            if (IsApiConnected(_QueryApi))
+            {
+                Thread.Sleep(3000);
+                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
+            }
+
+            if (IsApiConnected(_QueryApi))
+            {
+                Thread.Sleep(3000);
+                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
+            }
         }
+
+
 
         private void QueryAccountPosition_OnTimer()
         {
