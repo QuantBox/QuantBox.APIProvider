@@ -433,10 +433,8 @@ namespace QuantBox.APIProvider.Single
                 // 直接销毁
                 _DisconnectToApi(item.Api);
 
-                //// 在线程中销毁
-                //Task task = Task.Factory.StartNew(
-                //    ()=> { _DisconnectToApi(item.Api); }
-                //    );
+                // 立即断开连接后，登录时自动查资金与持仓的功能在线程中还在运行，会报错
+                assign(item, null);
 
                 item.Api = null;
             }
@@ -534,8 +532,6 @@ namespace QuantBox.APIProvider.Single
 
         private void QueryAccountPositionInstrument_Thread()
         {
-            
-
             ReqQueryField query = new ReqQueryField();
             query.PortfolioID1 = DefaultPortfolioID1;
             query.PortfolioID2 = DefaultPortfolioID2;
@@ -546,20 +542,23 @@ namespace QuantBox.APIProvider.Single
             if (IsApiConnected(_ItApi))
             {
                 Thread.Sleep(3000);
-                _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
+                if (IsApiConnected(_ItApi))
+                    _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
             }
 
             // 查持仓，查资金
             if (IsApiConnected(_QueryApi))
             {
                 Thread.Sleep(3000);
-                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
+                if (IsApiConnected(_QueryApi))
+                    _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
             }
 
             if (IsApiConnected(_QueryApi))
             {
                 Thread.Sleep(3000);
-                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
+                if (IsApiConnected(_QueryApi))
+                    _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
             }
         }
 

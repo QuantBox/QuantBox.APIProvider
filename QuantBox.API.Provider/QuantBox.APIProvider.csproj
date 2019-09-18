@@ -35,7 +35,7 @@
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.6.3\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.6.7\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="SmartQuant">
       <SpecificVersion>False</SpecificVersion>
@@ -117,7 +117,9 @@
     <Compile Include="UI\ComboBoxItemTypeConvert.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\DataSources\QuantBox.APIProvider.Single.ApiItem.datasource" />
     <None Include="Properties\DataSources\QuantBox.APIProvider.Single.ServerItem.datasource" />
     <None Include="Properties\DataSources\QuantBox.APIProvider.Single.UserItem.datasource" />
