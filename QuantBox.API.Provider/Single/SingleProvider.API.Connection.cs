@@ -163,6 +163,7 @@ namespace QuantBox.APIProvider.Single
                         // 停
                         bTryConnect = false;
                         st_next = st;
+                        break;
                     }
                     else if (ts <= st.SessionEnd)
                     {
@@ -539,27 +540,18 @@ namespace QuantBox.APIProvider.Single
             query.Business = DefaultBusiness;
 
             // 查合约
+            Thread.Sleep(3000);
             if (IsApiConnected(_ItApi))
-            {
-                Thread.Sleep(3000);
-                if (IsApiConnected(_ItApi))
-                    _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
-            }
+                _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
 
             // 查持仓，查资金
+            Thread.Sleep(3000);
             if (IsApiConnected(_QueryApi))
-            {
-                Thread.Sleep(3000);
-                if (IsApiConnected(_QueryApi))
-                    _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
-            }
+                _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
 
+            Thread.Sleep(3000);
             if (IsApiConnected(_QueryApi))
-            {
-                Thread.Sleep(3000);
-                if (IsApiConnected(_QueryApi))
-                    _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
-            }
+                _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
         }
 
 
