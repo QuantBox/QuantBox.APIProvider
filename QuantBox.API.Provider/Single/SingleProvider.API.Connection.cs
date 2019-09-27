@@ -284,7 +284,8 @@ namespace QuantBox.APIProvider.Single
             // 每个连接都检查是否连上，如果连上，开始进行一些基本的查询
             if (bCheckOk)
             {
-                base.Status = ProviderStatus.Connected;
+                // 晚一点通知上层，这个更稳定一些
+                // base.Status = ProviderStatus.Connected;
 
                 // 这个查询不能太快，否则CTP报错
                 QueryAccountPositionInstrument_Logined();
@@ -539,15 +540,19 @@ namespace QuantBox.APIProvider.Single
             query.PortfolioID3 = DefaultPortfolioID3;
             query.Business = DefaultBusiness;
 
-            // 查合约
+            
             Thread.Sleep(3000);
+            // 查合约
             if (IsApiConnected(_ItApi))
                 _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
-
-            // 查持仓，查资金
+            
             Thread.Sleep(3000);
+            // 查持仓，查资金
             if (IsApiConnected(_QueryApi))
                 _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
+
+            // 晚一点通知上层会不会更稳定一些?
+            base.Status = ProviderStatus.Connected;
 
             Thread.Sleep(3000);
             if (IsApiConnected(_QueryApi))
