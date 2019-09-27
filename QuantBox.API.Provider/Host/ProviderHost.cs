@@ -11,6 +11,7 @@ using System.ComponentModel;
 using QuantBox.APIProvider.Single;
 using System.Reflection;
 using System.Windows.Forms;
+using CommandLine;
 
 namespace QuantBox.APIProvider
 {
@@ -48,7 +49,48 @@ namespace QuantBox.APIProvider
             get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
         }
 
-        
+        class Options
+        {
+            [Value(0, MetaName = "filename", Required = true, HelpText = "项目路径")]
+            public string filename { get; set; }
+
+            [Option('r', "run", Required = false, Default = false, HelpText = "运行策略.")]
+            public bool run { get; set; }
+        }
+
+        void RunOptions(Options opts)
+        {
+            if (!(new FileInfo(opts.filename).Exists))
+                return;
+            
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            {
+                // 检查界面是否正常启动
+                while (Application.OpenForms.Count == 0 || Application.OpenForms[0].Name != "MainForm")
+                {
+                    System.Threading.Thread.Sleep(1000);
+                }
+                var mainForm = Application.OpenForms[0];
+
+                var sm = GetSolutionManager();
+                mainForm.SafeInvoke(() =>
+                {
+                    LoadSolution(sm, opts.filename);
+                });
+                if(opts.run)
+                {
+                    mainForm.SafeInvoke(() =>
+                    {
+                        Solution_Start(mainForm);
+                    });
+                }
+            });
+        }
+
+        void HandleParseError(IEnumerable<Error> errs)
+        {
+
+        }
 
         public ProviderHost(Framework framework)
             : base(framework)
@@ -67,6 +109,16 @@ namespace QuantBox.APIProvider
             Create(ProviderList);
 
             ProviderList.ListChanged += ProviderList_ListChanged;
+
+            // 通过命令行启动策略
+            //cd "C:\Program Files\SmartQuant Ltd\OpenQuant 2014"
+            //C:
+            //start OpenQuant.exe "D:\Users\Kan\Documents\OpenQuant 2014\Solutions\SMACrossover\SMACrossover.sln" --run
+            var args = System.Environment.GetCommandLineArgs().ToList();
+            args.RemoveAt(0);
+            CommandLine.Parser.Default.ParseArguments<Options>(args)
+                .WithParsed<Options>(opts => RunOptions(opts))
+                .WithNotParsed<Options>((errs) => HandleParseError(errs));
         }
 
         ~ProviderHost()
@@ -79,53 +131,19 @@ namespace QuantBox.APIProvider
             Save(ConfigPath);
         }
 
-        //private static bool _bMenuAdded;
-
         public void Init(byte id, string name)
         {
             base.id = id;
             base.name = name;
             base.description = "QuantBox API Provider Host";
             base.url = "www.quantbox.cn";
-
-            //if (!_bMenuAdded)
-            //{
-            //    try
-            //    {
-            //        // DOS窗口时没有问题，非DOS下异常，所以可以利用一下
-            //        Console.Clear();
-            //    }
-            //    catch
-            //    {
-            //        Console.WriteLine("要创建自己的菜单");
-            //        // 只有DOS窗口时要注意
-            //        System.Threading.ThreadPool.QueueUserWorkItem(delegate
-            //        {
-            //            while (Application.OpenForms.Count == 0 || Application.OpenForms[0].Name != "MainForm")
-            //            {
-            //                System.Threading.Thread.Sleep(1000);
-            //            }
-            //            Form mainForm = Application.OpenForms[0];
-
-            //            try
-            //            {
-            //                mainForm.SafeInvoke(() => { AddToolStripMenuItem(mainForm); });
-            //            }
-            //            catch (Exception e)
-            //            {
-            //                // 奇怪，调试的时候总是会出错
-            //                Console.WriteLine(e);
-            //            }
-            //        });
-            //    }
-            //    _bMenuAdded = true;
-            //}
         }
 
         /// <summary>
         /// 指定保存格式
         /// </summary>
-        private static readonly JsonSerializerSettings JSetting = new JsonSerializerSettings() {
+        private static readonly JsonSerializerSettings JSetting = new JsonSerializerSettings()
+        {
             //NullValueHandling = NullValueHandling.Ignore,
             //DefaultValueHandling = DefaultValueHandling.Ignore,
             Formatting = Formatting.Indented,
@@ -134,9 +152,11 @@ namespace QuantBox.APIProvider
         // 读取信息
         public void Load(string path)
         {
-            try {
+            try
+            {
                 object ret;
-                using (TextReader reader = new StreamReader(path)) {
+                using (TextReader reader = new StreamReader(path))
+                {
                     ret = JsonConvert.DeserializeObject(reader.ReadToEnd(), ProviderList.GetType());
                     reader.Close();
                 }
@@ -153,7 +173,8 @@ namespace QuantBox.APIProvider
             if (ProviderList == null)
                 return;
 
-            using (TextWriter writer = new StreamWriter(path)) {
+            using (TextWriter writer = new StreamWriter(path))
+            {
                 writer.Write("{0}", JsonConvert.SerializeObject(ProviderList, ProviderList.GetType(), JSetting));
                 writer.Close();
             }
@@ -174,9 +195,11 @@ namespace QuantBox.APIProvider
 
         public void Create(IList<ProviderItem> list)
         {
-            foreach (var l in list) {
+            foreach (var l in list)
+            {
                 IProvider pvd = framework.ProviderManager.GetProvider(l.Id);
-                if (pvd == null) {
+                if (pvd == null)
+                {
                     SingleProvider provider = new SingleProvider(framework);
                     provider.Init(l.Id, l.Name);
                     framework.ProviderManager.AddProvider(provider);
@@ -202,7 +225,7 @@ namespace QuantBox.APIProvider
         }
         public override void Send(ExecutionCommand command)
         {
-            if(command.RouteId == id)
+            if (command.RouteId == id)
                 return;
 
             IExecutionProvider provider;
@@ -247,6 +270,33 @@ namespace QuantBox.APIProvider
         {
             DataProvider.Unsubscribe(instrument);
         }
+        #endregion
+
+        #region auto start
+        private object GetSolutionManager()
+        {
+            // OpenQuant.Global.SolutionManager是静态属性，可以通过Get方式获得
+            var g = Assembly.GetEntryAssembly().GetType("OpenQuant.Global");
+            var sm = g.GetProperty("SolutionManager");
+            return sm.GetGetMethod().Invoke(null, null);
+        }
+
+        private void LoadSolution(object solutionManager, string filename)
+        {
+            var type = solutionManager.GetType();
+            var m = type.GetMethod("LoadSolution", BindingFlags.NonPublic | BindingFlags.Instance);
+            m.Invoke(solutionManager, new object[] { new FileInfo(filename) });
+        }
+
+        private void Solution_Start(Form from)
+        {
+            Type type = from.GetType();
+            var m = type.GetMethod("menuSolution_Start_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+            m.Invoke(from, new object[] { null, null });
+        }
+
+
+
         #endregion
     }
 }
