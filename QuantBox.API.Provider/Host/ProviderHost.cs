@@ -12,6 +12,8 @@ using QuantBox.APIProvider.Single;
 using System.Reflection;
 using System.Windows.Forms;
 using CommandLine;
+using ClipboardMonitor;
+using System.Threading;
 
 namespace QuantBox.APIProvider
 {
@@ -49,48 +51,7 @@ namespace QuantBox.APIProvider
             get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
         }
 
-        class Options
-        {
-            [Value(0, MetaName = "filename", Required = true, HelpText = "项目路径")]
-            public string filename { get; set; }
-
-            [Option('r', "run", Required = false, Default = false, HelpText = "运行策略.")]
-            public bool run { get; set; }
-        }
-
-        void RunOptions(Options opts)
-        {
-            if (!(new FileInfo(opts.filename).Exists))
-                return;
-            
-            System.Threading.ThreadPool.QueueUserWorkItem(delegate
-            {
-                // 检查界面是否正常启动
-                while (Application.OpenForms.Count == 0 || Application.OpenForms[0].Name != "MainForm")
-                {
-                    System.Threading.Thread.Sleep(1000);
-                }
-                var mainForm = Application.OpenForms[0];
-
-                var sm = GetSolutionManager();
-                mainForm.SafeInvoke(() =>
-                {
-                    LoadSolution(sm, opts.filename);
-                });
-                if(opts.run)
-                {
-                    mainForm.SafeInvoke(() =>
-                    {
-                        Solution_Start(mainForm);
-                    });
-                }
-            });
-        }
-
-        void HandleParseError(IEnumerable<Error> errs)
-        {
-
-        }
+        private CmdLine cmdLine = null;
 
         public ProviderHost(Framework framework)
             : base(framework)
@@ -110,15 +71,97 @@ namespace QuantBox.APIProvider
 
             ProviderList.ListChanged += ProviderList_ListChanged;
 
-            // 通过命令行启动策略
-            //cd "C:\Program Files\SmartQuant Ltd\OpenQuant 2014"
-            //C:
-            //start OpenQuant.exe "D:\Users\Kan\Documents\OpenQuant 2014\Solutions\SMACrossover\SMACrossover.sln" --run
-            var args = System.Environment.GetCommandLineArgs().ToList();
-            args.RemoveAt(0);
-            CommandLine.Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(opts => RunOptions(opts))
-                .WithNotParsed<Options>((errs) => HandleParseError(errs));
+            cmdLine = new CmdLine();
+
+            cmdLine.ParseForStart(this);
+
+            new ClipboardNotifications();
+            ClipboardNotifications.ClipboardUpdate += ClipboardNotifications_ClipboardUpdate;
+        }
+
+        private void ClipboardNotifications_ClipboardUpdate(object sender, EventArgs e)
+        {
+            cmdLine.ParseForStop(this);
+        }
+
+        private Form GetMainForm()
+        {
+            foreach (Form f in Application.OpenForms)
+            {
+                if (f.Name == "MainForm")
+                    return f;
+            }
+            return null;
+        }
+
+        public void Solution_Start_Thread(Options opts)
+        {
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            {
+                DateTime dt = DateTime.Now;
+                // 检查界面是否正常启动
+                var mainForm = GetMainForm();
+                while (mainForm == null)
+                {
+                    Thread.Sleep(1000);
+                    mainForm = GetMainForm();
+
+                    // 如果1分钟找不到就退出循环
+                    var ts = DateTime.Now - dt;
+                    if (ts.TotalSeconds > 60)
+                    {
+                        return;
+                    }
+                }
+
+                var sm = GetSolutionManager();
+                Thread.Sleep(1000);
+                mainForm.SafeInvoke(() =>
+                {
+                    LoadSolution(sm, opts.file);
+                });
+                if (opts.run)
+                {
+                    Thread.Sleep(3000);
+                    mainForm.SafeInvoke(() =>
+                    {
+                        Solution_Start(mainForm);
+                    });
+                }
+            });
+        }
+
+        public void Solution_Stop_Thread(Options opts)
+        {
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            {
+                var mainForm = GetMainForm();
+                if(mainForm == null)
+                {
+                    return;
+                }
+                var sm = GetSolutionManager();
+                if (opts.stop)
+                {
+                    // 没有停止的需要停止才能退出
+                    if (framework.StrategyManager.Status != StrategyStatus.Stopped)
+                    {
+                        Thread.Sleep(1000);
+                        mainForm.SafeInvoke(() =>
+                        {
+                            Solution_Stop(mainForm);
+                        });
+                    }
+                }
+                if (opts.exit)
+                {
+                    Thread.Sleep(3000);
+                    mainForm.SafeInvoke(() =>
+                    {
+                        File_Exit(mainForm);
+                    });
+                }
+            });
         }
 
         ~ProviderHost()
@@ -295,7 +338,19 @@ namespace QuantBox.APIProvider
             m.Invoke(from, new object[] { null, null });
         }
 
+        private void Solution_Stop(Form from)
+        {
+            Type type = from.GetType();
+            var m = type.GetMethod("menuSolution_Stop_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+            m.Invoke(from, new object[] { null, null });
+        }
 
+        private void File_Exit(Form from)
+        {
+            Type type = from.GetType();
+            var m = type.GetMethod("menuFile_Exit_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+            m.Invoke(from, new object[] { null, null });
+        }
 
         #endregion
     }
