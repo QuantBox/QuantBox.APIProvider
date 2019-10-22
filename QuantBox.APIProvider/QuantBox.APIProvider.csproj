@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>QuantBox.APIProvider</AssemblyName>
+    <RootNamespace>QuantBox.APIProvider</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClipboardMonitor" Version="0.3.0" />
+    <PackageReference Include="CommandLineParser" Version="2.6.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="NLog" Version="4.6.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuantBox.Extensions\QuantBox.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SmartQuant">
+      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\SmartQuant.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Design" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="XAPI_CSharp">
+      <HintPath>C:\Program Files\SmartQuant Ltd\OpenQuant 2014\XAPI_CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

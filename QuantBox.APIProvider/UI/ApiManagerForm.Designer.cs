@@ -1,5 +1,6 @@
 ﻿namespace QuantBox.APIProvider.UI
 {
+#if NET48
     partial class ApiManagerForm
     {
         /// <summary>
@@ -20,7 +21,7 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+#region Windows Form Designer generated code
 
         /// <summary>
         /// Required method for Designer support - do not modify
@@ -288,7 +289,7 @@
 
         }
 
-        #endregion
+#endregion
 
         private System.Windows.Forms.ListBox listBox_UserList;
         private System.Windows.Forms.PropertyGrid propertyGrid;
@@ -310,4 +311,5 @@
         private System.Windows.Forms.BindingSource serverItemBindingSource;
         private System.Windows.Forms.BindingSource apiItemBindingSource;
     }
+#endif
 }

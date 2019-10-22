@@ -1,11 +1,12 @@
-﻿using CommandLine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using CommandLine;
+
+#if NET48
 using System.Windows.Forms;
+#endif
 
 namespace QuantBox.APIProvider
 {
@@ -38,8 +39,8 @@ namespace QuantBox.APIProvider
             //C:
             //start OpenQuant.exe --file="D:\Users\Kan\Documents\OpenQuant 2014\Solutions\SMACrossover\SMACrossover.sln" --id=100 --run
 
-            var args = System.Environment.GetCommandLineArgs();
-            var text = System.Environment.CommandLine;
+            var args = Environment.GetCommandLineArgs();
+            var text = Environment.CommandLine;
             Console.WriteLine($"命令行: {text}");
             CommandLine.Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts => RunOptions(opts, host))
@@ -48,6 +49,7 @@ namespace QuantBox.APIProvider
 
         public void ParseForStop(ProviderHost host)
         {
+#if NET48
             //echo --id=100 --stop --exit | clip
             IDataObject ido = Clipboard.GetDataObject();
 
@@ -59,6 +61,7 @@ namespace QuantBox.APIProvider
             CommandLine.Parser.Default.ParseArguments<Options>(text.Split(' '))
                 .WithParsed<Options>(opts => ExitOptions(opts, host))
                 .WithNotParsed<Options>((errs) => HandleParseError(errs));
+#endif
         }
 
         void RunOptions(Options opts, ProviderHost host)

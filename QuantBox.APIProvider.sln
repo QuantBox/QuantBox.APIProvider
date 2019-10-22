@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantBox.Extensions", "QuantBox.Extensions\QuantBox.Extensions.csproj", "{1A772F95-B670-40AC-8D29-2B82A4B95E12}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantBox.APIProvider", "QuantBox.APIProvider\QuantBox.APIProvider.csproj", "{DD59FAE6-8CA6-4389-B934-06F26A08D289}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A772F95-B670-40AC-8D29-2B82A4B95E12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A772F95-B670-40AC-8D29-2B82A4B95E12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A772F95-B670-40AC-8D29-2B82A4B95E12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A772F95-B670-40AC-8D29-2B82A4B95E12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD59FAE6-8CA6-4389-B934-06F26A08D289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD59FAE6-8CA6-4389-B934-06F26A08D289}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD59FAE6-8CA6-4389-B934-06F26A08D289}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD59FAE6-8CA6-4389-B934-06F26A08D289}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE721877-AECD-4501-976D-2AA3C52F9CE0}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = SMACrossover\Realtime\Realtime.csproj
+	EndGlobalSection
+EndGlobal

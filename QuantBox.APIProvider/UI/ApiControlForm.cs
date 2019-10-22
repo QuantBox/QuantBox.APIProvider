@@ -1,17 +1,12 @@
 ﻿using QuantBox.APIProvider.Single;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
 using XAPI;
 
 namespace QuantBox.APIProvider.UI
 {
+#if NET48
+    using System.Windows.Forms;
     public partial class ApiControlForm : Form
     {
         public ApiControlForm()
@@ -74,4 +69,5 @@ namespace QuantBox.APIProvider.UI
             comboBox_BusinessType.DataSource = Enum.GetValues(typeof(BusinessType));
         }
     }
+#endif
 }

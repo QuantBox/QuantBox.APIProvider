@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 namespace QuantBox.APIProvider
 {
+#if NET48
+    using System.Windows.Forms;
+
     public static class ControlExtention
     {
         public delegate void InvokeHandler();
@@ -23,4 +26,5 @@ namespace QuantBox.APIProvider
             }
         }
     }
+#endif
 }

@@ -1,17 +1,14 @@
-﻿using NLog;
-using QuantBox.APIProvider.UI;
-using XAPI;
+﻿using XAPI;
 using SmartQuant;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using QuantBox.APIProvider.UI;
 
 namespace QuantBox.APIProvider.Single
 {
+#if NET48
+    using System.Drawing.Design;
+#endif
     public partial class SingleProvider : Provider
     {
         private const string CATEGORY_SETTINGS = "Settings";
@@ -130,9 +127,12 @@ namespace QuantBox.APIProvider.Single
 
 
         #region 通用
+
+#if NET48
+        [Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(UITypeEditor))]
+#endif
         [Category(CATEGORY_COMMON)]
         [Description("配置文件路径")]
-        [Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(UITypeEditor))]
         public string ConfigPath { get; set; }
 
         [Category(CATEGORY_COMMON)]
@@ -140,12 +140,18 @@ namespace QuantBox.APIProvider.Single
         public BindingList<SessionTimeItem> SessionTimeList { get; set; }
         #endregion
 
-        [Category(CATEGORY_SETTINGS), Editor(typeof(ApiManagerTypeEditor), typeof(UITypeEditor)),
-        Description("综合设置")]
+#if NET48
+        [Editor(typeof(ApiManagerTypeEditor), typeof(UITypeEditor))]
+#endif
+        [Category(CATEGORY_SETTINGS)]
+        [Description("综合设置")]
         public string AllConfig { get; set; }
 
-        [Category(CATEGORY_SETTINGS), Editor(typeof(ApiControlTypeEditor), typeof(UITypeEditor)),
-            Description("综合控制")]
+#if NET48
+        [Editor(typeof(ApiManagerTypeEditor), typeof(UITypeEditor))]
+#endif
+        [Category(CATEGORY_SETTINGS)]
+        [Description("综合控制")]
         public string AllControl { get; set; }
 
         [Browsable(false)]

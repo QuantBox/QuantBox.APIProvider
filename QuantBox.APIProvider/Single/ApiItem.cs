@@ -1,18 +1,13 @@
-﻿using Newtonsoft.Json;
-using QuantBox.APIProvider.UI;
+﻿using QuantBox.APIProvider.UI;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.Drawing.Design;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using XAPI;
 
 namespace QuantBox.APIProvider.Single
 {
+#if NET48
+    using System.Drawing.Design;
+#endif
     /// <summary>
     /// 由用户选择Dll,然后加载，得到
     /// 
@@ -28,9 +23,9 @@ namespace QuantBox.APIProvider.Single
         private string _dllPath;
         private string _typeName;
 
-        private IXApi CheckApi(string typeName,string dllPath)
+        private IXApi CheckApi(string typeName, string dllPath)
         {
-            if(string.IsNullOrEmpty(typeName))
+            if (string.IsNullOrEmpty(typeName))
             {
                 TypeName = "XAPI.Callback.XApi, XAPI_CSharp";
                 return null;
@@ -55,8 +50,9 @@ namespace QuantBox.APIProvider.Single
             }
             return api;
         }
-
+#if NET48
         [Editor(typeof(System.Windows.Forms.Design.FileNameEditor), typeof(System.Drawing.Design.UITypeEditor))]
+#endif
         public string DllPath
         {
             get
@@ -76,7 +72,8 @@ namespace QuantBox.APIProvider.Single
             {
                 return _typeName;
             }
-            set {
+            set
+            {
                 _typeName = value;
                 Api = CheckApi(_typeName, _dllPath);
             }
@@ -100,12 +97,13 @@ namespace QuantBox.APIProvider.Single
 
         public string LogPrefix { get; set; }
 
-
+#if NET48
+        [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
+#endif
         [Category(CATEGORY_TYPE)]
         [ReadOnly(true)]
         public ApiType Type { get; set; }
         [Category(CATEGORY_TYPE)]
-        [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
         public ApiType UseType { get; set; }
 
 

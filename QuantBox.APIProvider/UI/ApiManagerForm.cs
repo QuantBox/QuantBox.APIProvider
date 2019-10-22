@@ -7,10 +7,12 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 namespace QuantBox.APIProvider.UI
 {
+#if NET48
+    using System.Windows.Forms;
     public partial class ApiManagerForm : Form
     {
         public ApiManagerForm()
@@ -169,4 +171,5 @@ namespace QuantBox.APIProvider.UI
             provider.Save();
         }
     }
+#endif
 }

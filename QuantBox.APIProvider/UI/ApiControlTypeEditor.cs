@@ -1,15 +1,14 @@
-﻿using QuantBox.APIProvider.Single;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
-using System.Drawing.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms.Design;
+
+using QuantBox.APIProvider.Single;
 
 namespace QuantBox.APIProvider.UI
 {
+#if NET48
+    using System.Drawing.Design;
+    using System.Windows.Forms.Design;
+
     class ApiControlTypeEditor : UITypeEditor
     {
         // Methods
@@ -41,4 +40,5 @@ namespace QuantBox.APIProvider.UI
             return base.GetEditStyle(context);
         }
     }
+#endif
 }

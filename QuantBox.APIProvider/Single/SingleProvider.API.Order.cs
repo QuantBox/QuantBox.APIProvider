@@ -1,15 +1,10 @@
 ﻿using SmartQuant;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using QuantBox.Extensions;
 
 using XAPI.Callback;
 using XAPI;
-using Newtonsoft.Json;
 
 using SQ = SmartQuant;
 

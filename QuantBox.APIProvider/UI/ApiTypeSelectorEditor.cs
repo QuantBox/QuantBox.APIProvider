@@ -1,17 +1,16 @@
 ﻿using QuantBox.APIProvider.Single;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 using XAPI;
 
 namespace QuantBox.APIProvider.UI
 {
+#if NET48
+    using System.Windows.Forms;
+
     class ApiTypeSelectorEditor : ObjectSelectorEditor
     {
         private ObjectSelectorEditor.Selector selector;
@@ -44,7 +43,7 @@ namespace QuantBox.APIProvider.UI
                 {
                     if (category != ApiType.None)
                     {
-                        if((instance.Type & category) == category)
+                        if ((instance.Type & category) == category)
                         {
                             selector.AddNode(category.ToString(), (int)category, null).Checked = (instance.UseType & category) == category;
                         }
@@ -63,5 +62,5 @@ namespace QuantBox.APIProvider.UI
             e.Cancel = true;
         }
     }
-
+#endif
 }
