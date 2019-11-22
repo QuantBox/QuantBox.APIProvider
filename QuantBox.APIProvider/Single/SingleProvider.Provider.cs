@@ -16,6 +16,7 @@ namespace QuantBox.APIProvider.Single
     public partial class SingleProvider:Provider
     {
         private Logger xlog;
+        private Logger alog;
         private Logger barLog;
         private Logger tickLog;
 
@@ -56,6 +57,7 @@ namespace QuantBox.APIProvider.Single
 
             // 只是简单设置，等登录时将把账号设置上，X日志由于一些信息没法
             xlog = LogManager.GetLogger(Name + ".X");
+            alog = LogManager.GetLogger(Name + ".A");
             barLog = LogManager.GetLogger("Bar");
             tickLog = LogManager.GetLogger("Tick");
 

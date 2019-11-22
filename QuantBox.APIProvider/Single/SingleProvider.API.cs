@@ -32,6 +32,8 @@ namespace QuantBox.APIProvider.Single
         //记录合约列表,从实盘合约名到对象的映射
         private readonly Dictionary<string, InstrumentField> _dictInstruments = new Dictionary<string, InstrumentField>();
         private readonly Dictionary<string, InstrumentStatusField> _dictInstrumentsStatus = new Dictionary<string, InstrumentStatusField>();
+        private SortedDictionary<string, AccountField> _dictAccounts_current = new SortedDictionary<string, AccountField>();
+        private SortedDictionary<string, AccountField> _dictAccounts_last = new SortedDictionary<string, AccountField>();
 
         public static int GetDate(DateTime dt)
         {
@@ -90,6 +92,21 @@ namespace QuantBox.APIProvider.Single
             if (size1 <= 0)
                 return;
 
+            _dictAccounts_current[account.AccountID] = account;
+            if (bIsLast)
+            {
+                if(_dictAccounts_last.Count == 0)
+                {
+                    _dictAccounts_last = _dictAccounts_current;
+                }
+
+                ProcessAccounts(_dictAccounts_current, _dictAccounts_last);
+
+                _dictAccounts_last = _dictAccounts_current;
+                // 使用新容器
+                _dictAccounts_current = new SortedDictionary<string, AccountField>();
+            }
+
             if (!IsConnected)
                 return;
 
@@ -117,6 +134,30 @@ namespace QuantBox.APIProvider.Single
             {
                 (sender as XApi).GetLog().Error(ex);
             }
+        }
+
+        private void ProcessAccounts(SortedDictionary<string, AccountField> dict_curr, SortedDictionary<string, AccountField> dict_last)
+        {
+            // 开始比较
+            var list_curr = _dictAccounts_current.Values.ToList();
+            var list_last = _dictAccounts_last.Values.ToList();
+            var len = Math.Min(list_curr.Count, list_last.Count);
+            string str = "";
+            for (int i = 0; i < len; ++i)
+            {
+                var curr = list_curr[i];
+                var last = list_last[i];
+
+                if (true)
+                {
+                    str = AccountMsg_Long(curr, last);
+                }
+                else
+                {
+                    str = AccountMsg_Short(curr, last);
+                }
+            }
+            alog.Info(str);
         }
 
         private void OnRspQryInvestor_callback(object sender, ref InvestorField investor, int size1, bool bIsLast)
@@ -259,6 +300,53 @@ namespace QuantBox.APIProvider.Single
                 return instrumentStatus;
             }
             return instrumentStatus;
+        }
+
+        private string AccountMsg_Long(AccountField current, AccountField last)
+        {
+            double risk = current.CurrMargin * 100.0 / current.Balance;
+            double balance_1 = (current.Balance - current.Deposit + current.Withdraw) - current.PreBalance;
+            double balance_2 = current.Balance - last.Balance;
+
+            string str = "";
+
+            str += string.Format("{0:F2}%/{1:F0}/{2:F0}/{3:F0}", risk, current.PositionProfit, balance_1, balance_2);
+            str += string.Format("\n{0:F0}/{1:F0}/{2:F0}", current.CloseProfit, current.Commission, current.Available);
+            str += string.Format("\n风险度/持仓盈亏/日间权益差/区间权益差");
+            str += string.Format("\n平仓盈亏/手续费/可用资金\n");
+
+            str += string.Format("\n{0:F0}/{1:F0}", current.Withdraw, current.Deposit);
+            str += string.Format("\n出/入金\n");
+
+            str += string.Format("\n{0:F0}-*+*-{1:F0}=*", current.Balance, current.PreBalance);
+            str += string.Format("\n(动态权益-入金+出金)-昨结权益=日间权益差");
+            str += string.Format("\n动态权益-上期动态权益=区间权益差\n");
+
+            str += string.Format("\n{0:F0}/*=*", current.CurrMargin);
+            str += string.Format("\n占用保证金/动态权益=风险度\n");
+
+            str += string.Format("\n>>AccountID:{0}<<", current.AccountID);
+
+            return str;
+        }
+
+        private string AccountMsg_Short(AccountField current, AccountField last)
+        {
+            double risk = current.CurrMargin * 100.0 / current.Balance;
+            double balance_1 = (current.Balance - current.Deposit + current.Withdraw) - current.PreBalance;
+            double balance_2 = current.Balance - last.Balance;
+
+            string str = "";
+
+            str += string.Format("{0:F2}%/{1:F0}/{2:F0}/{3:F0}", risk, current.PositionProfit, balance_1, balance_2);
+            str += string.Format("\n{0:F0}/{1:F0}/{2:F0}", current.CloseProfit, current.Commission, current.Available);
+            str += string.Format("\n{0:F0}", current.Balance);
+            str += string.Format("\n风险度/持仓盈亏/日间权益差/区间权益差");
+            str += string.Format("\n平仓盈亏/手续费/可用资金");
+            str += string.Format("\n动态权益");
+            str += string.Format("\n>>AccountID:{0}<<", current.AccountID);
+
+            return str;
         }
     }
 }

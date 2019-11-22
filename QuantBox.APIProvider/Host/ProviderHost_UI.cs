@@ -25,7 +25,14 @@ namespace QuantBox.APIProvider
 
         private void ClipboardNotifications_ClipboardUpdate(object sender, EventArgs e)
         {
-            cmdLine.ParseForStop(this);
+            try
+            {
+                cmdLine.ParseForStop(this);
+            }
+            catch
+            {
+
+            }
         }
 
         private object GetSolutionManager()

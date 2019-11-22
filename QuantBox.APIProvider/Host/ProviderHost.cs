@@ -69,8 +69,15 @@ namespace QuantBox.APIProvider
 
 #if NET48
             cmdLine = new CmdLine();
+            try
+            {
+                cmdLine.ParseForStart(this);
+            }
+            catch
+            {
 
-            cmdLine.ParseForStart(this);
+            }
+            
 
             new ClipboardNotifications();
             ClipboardNotifications.ClipboardUpdate += ClipboardNotifications_ClipboardUpdate;
