@@ -287,6 +287,9 @@ namespace QuantBox.APIProvider.Single
             // 记录下来，后期可能要用到
             _dictInstrumentsStatus[instrumentStatus.Symbol] = instrumentStatus;
 
+            //  考虑收盘后，主动为一些合约标记成过期
+            OnRtnOrder_Expired(ref instrumentStatus);
+
             // 合约状态信息太多了，也不关心，这里屏蔽显示
             if (IsLogOnRtnInstrumentStatus)
                 (sender as XApi).GetLog().Info("OnRtnInstrumentStatus:" + instrumentStatus.ToFormattedString());

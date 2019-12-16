@@ -318,6 +318,46 @@ namespace QuantBox.APIProvider.Single
             }
         }
 
+        public void ProcessExpired(ref InstrumentStatusField instrumentStatus, NLog.Logger log)
+        {
+            // 根据当前挂单来统计
+            //if (workingOrders.Count == 0)
+            //    return;
+
+            if (instrumentStatus.InstrumentStatus != TradingPhaseType.Closed)
+                return;
+
+            foreach (var order in framework.OrderManager.Orders)
+            {
+                // 量有点多，需要判断一下
+                if (order.IsDone)
+                    continue;
+
+                var inst = order.Instrument;
+
+                string altSymbol;
+                string altExchange;
+                string apiSymbol;
+                string apiExchange;
+                double apiTickSize;
+                string apiProductID;
+
+                this.provider.GetApi_Symbol_Exchange_TickSize(inst, this.provider.Id,
+                    out altSymbol, out altExchange,
+                    out apiSymbol, out apiExchange,
+                    out apiTickSize,
+                    out apiProductID);
+
+                if (apiProductID != instrumentStatus.InstrumentID)
+                    continue;
+
+                ExecutionReport report = CreateReport(order, SQ.ExecType.ExecExpired, SQ.OrderStatus.Expired);
+                report.LeavesQty = 0;
+                report.Text = "收盘，插件标记定单过期";
+                provider.EmitExecutionReport(report);
+            }
+        }
+
         public void ProcessNew(ref QuoteField quote, QuoteRecord record)
         {
             OrderRecord askRecord = new OrderRecord(record.AskOrder);

@@ -19,11 +19,13 @@ namespace QuantBox.APIProvider.Single
             string apiSymbol;
             string apiExchange;
             double apiTickSize;
+            string apiProductID;
 
             GetApi_Symbol_Exchange_TickSize(request.Instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
-                out apiTickSize);
+                out apiTickSize,
+                out apiProductID);
 
             HistoricalDataRequestField field = new HistoricalDataRequestField();
             field.Symbol = request.Instrument.Symbol;

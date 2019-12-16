@@ -138,11 +138,13 @@ namespace QuantBox.APIProvider.Single
             string apiSymbol;
             string apiExchange;
             double apiTickSize;
+            string apiProductID;
 
             GetApi_Symbol_Exchange_TickSize(command.Instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
-                out apiTickSize);
+                out apiTickSize,
+                out apiProductID);
 
             OrderField[] fields = new OrderField[1];
 
@@ -201,11 +203,13 @@ namespace QuantBox.APIProvider.Single
                 string apiSymbol;
                 string apiExchange;
                 double apiTickSize;
+                string apiProductID;
 
-                GetApi_Symbol_Exchange_TickSize(orders[i].Instrument, this.id,
+                GetApi_Symbol_Exchange_TickSize(command.Instrument, this.id,
                     out altSymbol, out altExchange,
                     out apiSymbol, out apiExchange,
-                    out apiTickSize);
+                    out apiTickSize,
+                    out apiProductID);
 
                 ToOrderStruct(ref fields[i], orders[i], apiSymbol, apiExchange);
             }
@@ -262,7 +266,7 @@ namespace QuantBox.APIProvider.Single
 
         private void OnRtnTrade_callback(object sender, ref TradeField trade)
         {
-            lock(this)
+            lock (this)
             {
                 var log = (sender as XApi).GetLog();
                 log.Debug("OnRtnTrade:" + trade.ToFormattedString());
@@ -274,6 +278,26 @@ namespace QuantBox.APIProvider.Single
                 try
                 {
                     orderMap.Process(ref trade, log);
+                }
+                catch (Exception ex)
+                {
+                    log.Error(ex);
+                }
+            }
+        }
+
+        private void OnRtnOrder_Expired(ref InstrumentStatusField instrumentStatus)
+        {
+            if (_TdApi == null)
+                return;
+
+            lock (this)
+            {
+                var log = _TdApi.GetLog();
+
+                try
+                {
+                    orderMap.ProcessExpired(ref instrumentStatus, log);
                 }
                 catch (Exception ex)
                 {

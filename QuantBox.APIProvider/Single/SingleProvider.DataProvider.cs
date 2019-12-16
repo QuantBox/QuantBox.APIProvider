@@ -40,11 +40,13 @@ namespace QuantBox.APIProvider.Single
             string apiSymbol;
             string apiExchange;
             double apiTickSize;
+            string apiProductID;
 
             GetApi_Symbol_Exchange_TickSize(instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
-                out apiTickSize);
+                out apiTickSize,
+                out apiProductID);
 
             // 如果是对CTP接口，使用UFX的参数进行订阅是否有问题？IF1802.7,目前猜没有问题
             string Symbol_Dot_Exchange = string.Format("{0}.{1}", apiSymbol, apiExchange);
@@ -88,11 +90,13 @@ namespace QuantBox.APIProvider.Single
             string apiSymbol;
             string apiExchange;
             double apiTickSize;
+            string apiProductID;
 
             GetApi_Symbol_Exchange_TickSize(instrument, this.id,
                 out altSymbol, out altExchange,
                 out apiSymbol, out apiExchange,
-                out apiTickSize);
+                out apiTickSize,
+                out apiProductID);
 
             string Symbol_Dot_Exchange = string.Format("{0}.{1}", apiSymbol, apiExchange);
             string Symbol_Dot = string.Format("{0}.", apiSymbol);

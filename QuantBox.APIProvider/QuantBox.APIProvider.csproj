@@ -29,4 +29,8 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetPath) &quot;C:\Program Files\SmartQuant Ltd\OpenQuant 2014&quot;" />
+  </Target>
+
 </Project>

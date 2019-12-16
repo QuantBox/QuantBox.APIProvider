@@ -12,7 +12,7 @@ namespace QuantBox.APIProvider.Single
 {
     class BaseMap
     {
-        private Framework framework;
+        protected Framework framework;
         protected SingleProvider provider;
 
         public BaseMap(Framework framework, SingleProvider provider)
@@ -31,20 +31,31 @@ namespace QuantBox.APIProvider.Single
 
             report.DateTime = framework.Clock.DateTime;
 
-            //report.Order = record.Order;
-            //report.Instrument = record.Order.Instrument;
-            
-            //report.Side = record.Order.Side;
-            //report.OrdType = record.Order.Type;
-            //report.TimeInForce = record.Order.TimeInForce;
-
-            //report.OrdQty = record.Order.Qty;
-            //report.Price = record.Order.Price;
-            //report.StopPx = record.Order.StopPx;
-
             report.AvgPx = record.AvgPx;
             report.CumQty = record.CumQty;
             report.LeavesQty = record.LeavesQty;
+
+            if (execType != null)
+                report.ExecType = execType.Value;
+
+            if (orderStatus != null)
+                report.OrdStatus = orderStatus.Value;
+
+            return report;
+        }
+
+        public ExecutionReport CreateReport(
+            Order order,
+            SQ.ExecType? execType,
+            SQ.OrderStatus? orderStatus)
+        {
+            ExecutionReport report = new ExecutionReport(order);
+
+            report.DateTime = framework.Clock.DateTime;
+
+            report.AvgPx = order.AvgPx;
+            report.CumQty = order.CumQty;
+            report.LeavesQty = order.LeavesQty;
 
             if (execType != null)
                 report.ExecType = execType.Value;
