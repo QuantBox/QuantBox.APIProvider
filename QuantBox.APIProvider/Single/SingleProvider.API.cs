@@ -31,9 +31,16 @@ namespace QuantBox.APIProvider.Single
 
         //记录合约列表,从实盘合约名到对象的映射
         private readonly Dictionary<string, InstrumentField> _dictInstruments = new Dictionary<string, InstrumentField>();
+        // 品种交易状态
         private readonly Dictionary<string, InstrumentStatusField> _dictInstrumentsStatus = new Dictionary<string, InstrumentStatusField>();
+
+        // 账号信息
         private SortedDictionary<string, AccountField> _dictAccounts_current = new SortedDictionary<string, AccountField>();
         private SortedDictionary<string, AccountField> _dictAccounts_last = new SortedDictionary<string, AccountField>();
+
+        // 持仓信息
+        private SortedDictionary<string, PositionField> _dictPositions_current = new SortedDictionary<string, PositionField>();
+        private SortedDictionary<string, PositionField> _dictPositions_last = new SortedDictionary<string, PositionField>();
 
         public static int GetDate(DateTime dt)
         {
@@ -89,75 +96,79 @@ namespace QuantBox.APIProvider.Single
             if (OnRspQryTradingAccount != null)
                 OnRspQryTradingAccount(sender, ref account, size1, bIsLast);
 
-            if (size1 <= 0)
+            if (size1 > 0)
+            {
+                _dictAccounts_current[account.AccountID] = account;
+            }
+
+            if (!bIsLast)
                 return;
 
-            _dictAccounts_current[account.AccountID] = account;
-            if (bIsLast)
-            {
-                if(_dictAccounts_last.Count == 0)
-                {
-                    _dictAccounts_last = _dictAccounts_current;
-                }
+            var list = MergeAccounts(_dictAccounts_current, _dictAccounts_last);
+            alog.Info(string.Join("\n", list));
 
-                ProcessAccounts(_dictAccounts_current, _dictAccounts_last);
-
-                _dictAccounts_last = _dictAccounts_current;
-                // 使用新容器
-                _dictAccounts_current = new SortedDictionary<string, AccountField>();
-            }
+            _dictAccounts_last = _dictAccounts_current;
+            _dictAccounts_current = new SortedDictionary<string, AccountField>();
 
             if (!IsConnected)
                 return;
 
-            string currency = "CNY";
-
-            AccountData ad = new AccountData(DateTime.Now, AccountDataType.AccountValue,
-                account.AccountID, this.id, this.id);
-
-            Type type = typeof(AccountField);
-            FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (FieldInfo field in fields)
+            foreach (var acc in _dictAccounts_last.Values)
             {
-                ad.Fields.Add(field.Name, currency, field.GetValue(account));
-            }
-            // 将对像完全设置进去，等着取出
-            ad.Fields.Add(AccountDataFieldEx.USER_DATA, currency, account);
-            ad.Fields.Add(AccountDataFieldEx.DATE, currency, GetDate(DateTime.Today));
+                string currency = "CNY";
 
+                AccountData ad = new AccountData(DateTime.Now, AccountDataType.AccountValue,
+                    acc.AccountID, this.id, this.id);
 
-            try
-            {
-                EmitAccountData(ad);
-            }
-            catch (Exception ex)
-            {
-                (sender as XApi).GetLog().Error(ex);
+                Type type = typeof(AccountField);
+                FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+                foreach (FieldInfo field in fields)
+                {
+                    ad.Fields.Add(field.Name, currency, field.GetValue(acc));
+                }
+                // 将对像完全设置进去，等着取出
+                ad.Fields.Add(AccountDataFieldEx.USER_DATA, currency, acc);
+                ad.Fields.Add(AccountDataFieldEx.DATE, currency, GetDate(DateTime.Today));
+
+                try
+                {
+                    EmitAccountData(ad);
+                }
+                catch (Exception ex)
+                {
+                    (sender as XApi).GetLog().Error(ex);
+                }
             }
         }
 
-        private void ProcessAccounts(SortedDictionary<string, AccountField> dict_curr, SortedDictionary<string, AccountField> dict_last)
+        private List<string> MergeAccounts(SortedDictionary<string, AccountField> dict_curr, SortedDictionary<string, AccountField> dict_last)
         {
-            // 开始比较
-            var list_curr = _dictAccounts_current.Values.ToList();
-            var list_last = _dictAccounts_last.Values.ToList();
-            var len = Math.Min(list_curr.Count, list_last.Count);
-            string str = "";
-            for (int i = 0; i < len; ++i)
+            var list = new List<string>();
+            // 交集
             {
-                var curr = list_curr[i];
-                var last = list_last[i];
+                var keys = dict_curr.Keys.Intersect(dict_last.Keys);
+                foreach (var key in keys)
+                {
+                    var curr = dict_curr[key];
+                    var last = dict_last[key];
 
-                if (true)
-                {
-                    str = AccountMsg_Long(curr, last);
-                }
-                else
-                {
-                    str = AccountMsg_Short(curr, last);
+                    list.Add(AccountMsg_Long(curr, last));
                 }
             }
-            alog.Info(str);
+
+            // 差集，表示新增
+            {
+                var keys = dict_curr.Keys.Except(dict_last.Keys);
+                foreach (var key in keys)
+                {
+                    var curr = dict_curr[key];
+                    var last = new AccountField();
+
+                    list.Add(AccountMsg_Long(curr, last));
+                }
+            }
+            return list;
+
         }
 
         private void OnRspQryInvestor_callback(object sender, ref InvestorField investor, int size1, bool bIsLast)
@@ -188,40 +199,81 @@ namespace QuantBox.APIProvider.Single
             if (OnRspQryInvestorPosition != null)
                 OnRspQryInvestorPosition(sender, ref position, size1, bIsLast);
 
-            if (size1 <= 0)
+            // 需要保证从上一个查询到现在，列表中的数据是本次查询的所有数据
+            if (size1 > 0)
+            {
+                _dictPositions_current[position.ID] = position;
+            }
+
+            if (!bIsLast)
                 return;
+
+            // 比较两次容器的区别
+            var list = MergePositions(_dictPositions_current, _dictPositions_last);
+            _dictPositions_last = _dictPositions_current;
+            _dictPositions_current = new SortedDictionary<string, PositionField>();
 
             if (!IsConnected)
                 return;
 
-            PositionFieldEx item;
-            if (!positions.TryGetValue(position.Symbol, out item))
+            // 没有持仓通知的合约，也通知为0
+            foreach (var pos in list)
             {
-                item = new PositionFieldEx();
-                positions[position.Symbol] = item;
+                PositionFieldEx item;
+                if (!positions.TryGetValue(pos.Symbol, out item))
+                {
+                    item = new PositionFieldEx();
+                    positions[pos.Symbol] = item;
+                }
+                item.AddPosition(pos);
+
+                AccountData ad = new AccountData(DateTime.Now, AccountDataType.Position,
+                    pos.AccountID, this.id, this.id);
+
+                ad.Fields.Add(AccountDataField.SYMBOL, item.Symbol);
+                ad.Fields.Add(AccountDataField.EXCHANGE, item.Exchange);
+                ad.Fields.Add(AccountDataField.QTY, item.Qty);
+                ad.Fields.Add(AccountDataField.LONG_QTY, item.LongQty);
+                ad.Fields.Add(AccountDataField.SHORT_QTY, item.ShortQty);
+
+                ad.Fields.Add(AccountDataFieldEx.USER_DATA, item);
+                ad.Fields.Add(AccountDataFieldEx.DATE, GetDate(DateTime.Today));
+
+                try
+                {
+                    EmitAccountData(ad);
+                }
+                catch (Exception ex)
+                {
+                    (sender as XApi).GetLog().Error(ex);
+                }
             }
-            item.AddPosition(position);
+        }
 
-            AccountData ad = new AccountData(DateTime.Now, AccountDataType.Position,
-                position.AccountID, this.id, this.id);
+        private List<PositionField> MergePositions(SortedDictionary<string, PositionField> dict_curr, SortedDictionary<string, PositionField> dict_last)
+        {
+            // 由于可能收不到接口推送的持仓已经清空的消息，所以只能使用两次进行比较
+            var list = new List<PositionField>();
 
-            ad.Fields.Add(AccountDataField.SYMBOL, item.Symbol);
-            ad.Fields.Add(AccountDataField.EXCHANGE, item.Exchange);
-            ad.Fields.Add(AccountDataField.QTY, item.Qty);
-            ad.Fields.Add(AccountDataField.LONG_QTY, item.LongQty);
-            ad.Fields.Add(AccountDataField.SHORT_QTY, item.ShortQty);
-
-            ad.Fields.Add(AccountDataFieldEx.USER_DATA, item);
-            ad.Fields.Add(AccountDataFieldEx.DATE, GetDate(DateTime.Today));
-
-            try
+            // 新的全部添加
+            foreach (var v in dict_curr.Values)
             {
-                EmitAccountData(ad);
+                list.Add(v);
             }
-            catch (Exception ex)
+
+            // 老的需要更改数据为0
             {
-                (sender as XApi).GetLog().Error(ex);
+                var keys = dict_last.Keys.Except(dict_curr.Keys);
+                foreach (var key in keys)
+                {
+                    var last = dict_last[key];
+                    // 修改时间
+                    last.Position = 0;
+                    list.Add(last);
+                }
             }
+
+            return list;
         }
 
         private void OnRspQrySettlementInfo_callback(object sender, ref SettlementInfoClass settlementInfo, int size1, bool bIsLast)

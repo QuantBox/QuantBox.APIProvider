@@ -545,14 +545,21 @@ namespace QuantBox.APIProvider.Single
             Thread.Sleep(3000);
             // 查持仓，查资金
             if (IsApiConnected(_QueryApi))
+            {
+                _dictAccounts_current.Clear();
                 _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
+            }
+                
 
             // 晚一点通知上层会不会更稳定一些?
             base.Status = ProviderStatus.Connected;
 
             Thread.Sleep(3000);
             if (IsApiConnected(_QueryApi))
+            {
+                _dictPositions_current.Clear();
                 _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
+            }
         }
 
 
@@ -571,6 +578,7 @@ namespace QuantBox.APIProvider.Single
             _QueryAccountCount -= (int)_Timer.Interval / 1000;
             if (_QueryAccountCount <= 0)
             {
+                _dictAccounts_current.Clear();
                 _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
                 _QueryAccountCount = _QueryAccountInterval;
             }
@@ -578,6 +586,7 @@ namespace QuantBox.APIProvider.Single
             _QueryPositionCount -= (int)_Timer.Interval / 1000;
             if (_QueryPositionCount <= 0)
             {
+                _dictPositions_current.Clear();
                 _QueryApi.ReqQuery(QueryType.ReqQryInvestorPosition, query);
                 _QueryPositionCount = _QueryPositionInterval;
             }
