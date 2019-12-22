@@ -138,21 +138,20 @@ namespace QuantBox.APIProvider.Single
                 if (SessionTimeList == null || SessionTimeList.Count == 0)
                     break;
 
-                var stl = SessionTimeList.Where(x => x.Enable).ToList();
+                var stl = SessionTimeList.Where(x => x.Contains(e.SignalTime.DayOfWeek)).ToList();
                 if (stl.Count == 0)
+                {
                     break;
+                }
 
                 bool bTryConnect = true;
-
+                TimeSpan ts = e.SignalTime.TimeOfDay;
                 SessionTimeItem st_current = null;
                 SessionTimeItem st_next = null;
                 foreach (var st in stl)
                 {
                     // 如果当前时间在交易范围内，要开启重连
                     // 如果当前时间不在交易范围内，要主动断开
-                    TimeSpan ts = e.SignalTime.TimeOfDay;
-                    if (!st.Enable)
-                        continue;
 
                     if (ts < st.SessionStart)
                     {
@@ -181,7 +180,7 @@ namespace QuantBox.APIProvider.Single
                     // 没有连接要连上，有连接要设置时间
                     if (!IsConnected)
                     {
-                        xlog.Info("当前[{0}]在交易时段[{1}]，主动连接", e.SignalTime.TimeOfDay, st_current);
+                        xlog.Info($"当前[{e.SignalTime.TimeOfDay}]在交易时段[{st_current}]，主动连接");
                         _Connect(false);
                     }
 
@@ -197,7 +196,7 @@ namespace QuantBox.APIProvider.Single
                     // 由于定时器设置的是20秒，所以这里正好是5分钟显示一次
                     if (nDisconnectCount % (3 * 5) == 0)
                     {
-                        xlog.Info("当前[{0}]在非交易时段，主动断开连接，下次要连接的时段为[{1}]", e.SignalTime.TimeOfDay, st_next);
+                        xlog.Info($"当前[{e.SignalTime.TimeOfDay}]在非交易时段，主动断开连接，下次要连接的时段为[{st_next}](仅限当日)");
 
                         // 要断开连接
                         _Disconnect(false);
@@ -536,12 +535,12 @@ namespace QuantBox.APIProvider.Single
             query.PortfolioID3 = DefaultPortfolioID3;
             query.Business = DefaultBusiness;
 
-            
+
             Thread.Sleep(3000);
             // 查合约
             if (IsApiConnected(_ItApi))
                 _ItApi.ReqQuery(QueryType.ReqQryInstrument, query);
-            
+
             Thread.Sleep(3000);
             // 查持仓，查资金
             if (IsApiConnected(_QueryApi))
@@ -549,7 +548,7 @@ namespace QuantBox.APIProvider.Single
                 _dictAccounts_current.Clear();
                 _QueryApi.ReqQuery(QueryType.ReqQryTradingAccount, query);
             }
-                
+
 
             // 晚一点通知上层会不会更稳定一些?
             base.Status = ProviderStatus.Connected;

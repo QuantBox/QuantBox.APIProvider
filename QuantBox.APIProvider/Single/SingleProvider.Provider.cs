@@ -17,6 +17,7 @@ namespace QuantBox.APIProvider.Single
     {
         private Logger xlog;
         private Logger alog;
+        private Logger plog;
         private Logger barLog;
         private Logger tickLog;
 
@@ -58,6 +59,7 @@ namespace QuantBox.APIProvider.Single
             // 只是简单设置，等登录时将把账号设置上，X日志由于一些信息没法
             xlog = LogManager.GetLogger(Name + ".X");
             alog = LogManager.GetLogger(Name + ".A");
+            plog = LogManager.GetLogger(Name + ".P");
             barLog = LogManager.GetLogger("Bar");
             tickLog = LogManager.GetLogger("Tick");
 
@@ -89,7 +91,7 @@ namespace QuantBox.APIProvider.Single
             historicalDataIds = new Dictionary<string,int>();
 
             // ConfigPath在做Setting时已经做了
-            //Load();
+            Load();
         }
 
         void SessionTimeList_ListChanged(object sender, ListChangedEventArgs e)
