@@ -193,6 +193,9 @@ namespace QuantBox.APIProvider.Single
                 // UFX中已经过期的持仓也会推送，所以这里过滤一下不显示
                 if (IsLogOnRspQryInvestorPosition)
                     (sender as XApi).GetLog().Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
+
+                if (position.Position > 0)
+                    plog.Info($"{position.Symbol},{position.Side},今+昨=总:{position.TodayPosition}+{position.HistoryPosition}={position.Position}");
             }
 
             // 由策略来收回报
