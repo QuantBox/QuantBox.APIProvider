@@ -193,9 +193,6 @@ namespace QuantBox.APIProvider.Single
                 // UFX中已经过期的持仓也会推送，所以这里过滤一下不显示
                 if (IsLogOnRspQryInvestorPosition)
                     (sender as XApi).GetLog().Info("OnRspQryInvestorPosition:" + position.ToFormattedString());
-
-                if (position.Position > 0)
-                    plog.Info($"{position.Symbol},{position.Side},今+昨=总:{position.TodayPosition}+{position.HistoryPosition}={position.Position}");
             }
 
             // 由策略来收回报
@@ -210,6 +207,8 @@ namespace QuantBox.APIProvider.Single
 
             if (!bIsLast)
                 return;
+
+            PositionsMsg_Long(_dictPositions_current);
 
             // 比较两次容器的区别
             var list = MergePositions(_dictPositions_current, _dictPositions_last);
@@ -366,24 +365,22 @@ namespace QuantBox.APIProvider.Single
             double balance_1 = (current.Balance - current.Deposit + current.Withdraw) - current.PreBalance;
             double balance_2 = current.Balance - last.Balance;
 
-            string str = "";
-
-            str += string.Format("{0:F2}%/{1:F0}/{2:F0}/{3:F0}", risk, current.PositionProfit, balance_1, balance_2);
-            str += string.Format("\n{0:F0}/{1:F0}/{2:F0}", current.CloseProfit, current.Commission, current.Available);
-            str += string.Format("\n风险度/持仓盈亏/日间权益差/区间权益差");
-            str += string.Format("\n平仓盈亏/手续费/可用资金\n");
-
-            str += string.Format("\n{0:F0}/{1:F0}", current.Withdraw, current.Deposit);
-            str += string.Format("\n出/入金\n");
-
-            str += string.Format("\n{0:F0}-*+*-{1:F0}=*", current.Balance, current.PreBalance);
-            str += string.Format("\n(动态权益-入金+出金)-昨结权益=日间权益差");
-            str += string.Format("\n动态权益-上期动态权益=区间权益差\n");
-
-            str += string.Format("\n{0:F0}/*=*", current.CurrMargin);
-            str += string.Format("\n占用保证金/动态权益=风险度\n");
-
-            str += string.Format("\n>>AccountID:{0}<<", current.AccountID);
+            string str = $"{risk:F2}%/{current.PositionProfit:F0}/{balance_1:F0}/{balance_2:F0}" +
+                $"\n{current.CloseProfit:F0}/{current.Commission:F0}/{current.Available:F0}" +
+                $"\n风险度/持仓盈亏/日间权益差/区间权益差" +
+                $"\n平仓盈亏/手续费/可用资金\n" +
+                $"\n{current.Withdraw:F0}/{current.Deposit:F0}" +
+                $"\n出/入金" +
+                $"\n" +
+                $"\n{current.Balance:F0}-*+*-{current.PreBalance:F0}=*" +
+                $"\n(动态权益-入金+出金)-昨结权益=日间权益差" +
+                $"\n动态权益-上期动态权益=区间权益差" +
+                $"\n" +
+                $"\n{current.CurrMargin:F0}/*=*" +
+                $"\n占用保证金/动态权益=风险度" +
+                $"\n" +
+                $"\n>>AccountID:{current.AccountID}<<" +
+                $"\n>>{DateTime.Now.ToLongTimeString()}<<";
 
             return str;
         }
@@ -403,6 +400,24 @@ namespace QuantBox.APIProvider.Single
             str += string.Format("\n平仓盈亏/手续费/可用资金");
             str += string.Format("\n动态权益");
             str += string.Format("\n>>AccountID:{0}<<", current.AccountID);
+
+            return str;
+        }
+
+        private string PositionsMsg_Long(SortedDictionary<string, PositionField> positions)
+        {
+            if (positions.Count == 0)
+                return null;
+
+            string str = "";
+            foreach (var p in positions.Values)
+            {
+                str += $"{p.Symbol},{p.Side.ToString()},{p.HistoryPosition}+{p.TodayPosition}={p.Position}\n";
+
+            }
+            str += $"\n合约,多空,昨+今=总";
+            str += $"\n>>{DateTime.Now.ToLongTimeString()}<<";
+            plog.Info(str);
 
             return str;
         }
