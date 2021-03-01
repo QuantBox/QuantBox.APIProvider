@@ -6,6 +6,7 @@ using XAPI;
 using NLog;
 using QuantBox.Extensions;
 using System.Threading;
+using System.IO;
 
 namespace QuantBox.APIProvider.Single
 {
@@ -380,11 +381,12 @@ namespace QuantBox.APIProvider.Single
                     item.Api = api;
                 }
 
-                api.Server = ServerList[item.Server].ToStruct();
-                api.User = UserList[item.User].ToStruct();
+                string szServerPath = ServerList[item.Server].Path;
+                string szUserPath = UserList[item.User].Path;
+                string szUserLabel = UserList[item.User].Label;
 
                 // 更新Log名字，这样在日志中可以进行识别
-                api.Log = LogManager.GetLogger(string.Format("{0}.{1}.{2}", Name, item.LogPrefix, api.User.UserID));
+                api.Log = LogManager.GetLogger(string.Format("{0}.{1}.{2}", Name, item.LogPrefix, szUserLabel));
 
                 if (api.IsConnected)
                     return api;
@@ -416,7 +418,7 @@ namespace QuantBox.APIProvider.Single
                 api.OnRspQrySettlementInfo = OnRspQrySettlementInfo_callback;
                 api.OnRtnInstrumentStatus = OnRtnInstrumentStatus_callback;
 
-                api.Connect();
+                api.Connect(szServerPath, szUserPath, Path.GetTempPath());
 
                 return api;
             }

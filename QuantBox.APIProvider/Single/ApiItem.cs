@@ -97,12 +97,13 @@ namespace QuantBox.APIProvider.Single
 
         public string LogPrefix { get; set; }
 
-#if NET48
-        [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
-#endif
+
         [Category(CATEGORY_TYPE)]
         [ReadOnly(true)]
         public ApiType Type { get; set; }
+#if NET48
+        [Editor(typeof(ApiTypeSelectorEditor), typeof(UITypeEditor))]
+#endif
         [Category(CATEGORY_TYPE)]
         public ApiType UseType { get; set; }
 
