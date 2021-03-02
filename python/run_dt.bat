@@ -1,0 +1,2 @@
+python dtlogger.py
+pause
