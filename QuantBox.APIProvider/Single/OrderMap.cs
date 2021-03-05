@@ -228,7 +228,7 @@ namespace QuantBox.APIProvider.Single
                             workingOrders.Remove(order.ID);
                             orderIDs.Remove(record.Order.Id);
                             record.LeavesQty = 0;
-                            EmitExecutionReport(record, SQ.ExecType.ExecCancelled, SQ.OrderStatus.Cancelled);
+                            EmitExecutionReport(record, SQ.ExecType.ExecCancelled, SQ.OrderStatus.Cancelled, order.Text());
                         }
                         else if (this.pendingOrders.TryRemove(order.LocalID, out record))
                         {

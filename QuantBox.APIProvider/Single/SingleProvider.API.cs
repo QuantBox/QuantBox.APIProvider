@@ -18,7 +18,7 @@ namespace QuantBox.APIProvider.Single
     {
         static SingleProvider()
         {
-            NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(Path.Combine(PathHelper.RootPath.LocalPath, "NLog.config"), true);
+            NLog.LogManager.LoadConfiguration(Path.Combine(PathHelper.RootPath.LocalPath, "NLog.config"));
         }
         public DelegateOnRspQryInvestorPosition OnRspQryInvestorPosition { get; set; }
         public DelegateOnRspQryTradingAccount OnRspQryTradingAccount { get; set; }
