@@ -19,7 +19,7 @@ namespace QuantBox.APIProvider.Single
         public string Label { get; set; }
 
 #if NET48
-        [Editor(typeof(System.Windows.Forms.Design.FolderNameEditor), typeof(UITypeEditor))]
+        [Editor(typeof(System.Windows.Forms.Design.FileNameEditor), typeof(UITypeEditor))]
 #endif
         public string Path { get; set; }
         
